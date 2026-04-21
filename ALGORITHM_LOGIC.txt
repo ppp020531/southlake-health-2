@@ -1,0 +1,644 @@
+================================================================================
+  SOUTHLAKE HEALTH · SYNTHETIC DATA WORKSPACE — METADATA & GENERATION ALGORITHM
+================================================================================
+
+本文档覆盖:
+  (A) Metadata 是怎么从 source data 推断出来的
+  (B) 每个 metadata 字段 (data_type / strategy / control_action) 控制生成的哪一步
+  (C) Controls dict 里每个参数的数学含义
+  (D) generate_synthetic_advanced() 的完整执行顺序
+  (E) 4 种核心 sampling 算法的数学推导 (copula / DP Laplace / KDE / empirical)
+  (F) Anchor blending + rare-case retention 的混合逻辑
+  (G) Constraint 检测 + 修复规则
+  (H) Validator 的 fidelity / privacy / correlation / overall 分数如何计算
+
+所有引用用 file:line 格式标注,方便回代码查证。
+
+
+================================================================================
+A. METADATA 是怎么推断出来的 — src/profiler.py + src/metadata_builder.py
+================================================================================
+
+Pipeline:  CSV → profile_dataframe() → build_metadata() → 用户可编辑 editor_df
+
+A.1 Semantic role inference (profiler.py:14-38)
+----------------------------------------------------
+每列 (column) 根据 name + dtype + values 推一个 semantic_role:
+
+  if name 含 encounter_id / patient_id / visit_id / mrn:
+      role = "identifier"
+  elif pandas bool dtype:
+      role = "binary"
+  elif pandas numeric dtype:
+      if 非空值 unique count ≤ 2:  role = "binary"
+      else:                          role = "numeric"
+  else (字符串):
+      解析为 datetime, 若 ≥85% 成功且 unique > 2:  role = "date"
+      normalized_strings.nunique() ≤ 2:             role = "binary"
+      otherwise:                                     role = "categorical"
+
+  → 5 种 role: identifier / binary / numeric / date / categorical
+
+A.2 Per-column profile (profiler.py:41-94)
+----------------------------------------------------
+对每列计算:
+  missing_count, missing_pct, unique_count, unique_ratio, examples[0..2],
+  completeness_score = 100 - (missing_count / row_count) * 100
+  numeric: min / max / mean / std (ddof=0) / q1 / median / q3
+  date:    min / max (as ISO date strings)
+  其他:    top_values (最高5个 value → % share)
+
+A.3 build_metadata() 默认 strategy + control_action 分配 (metadata_builder.py:8-62)
+----------------------------------------------------
+  DEFAULT_STRATEGIES (按 role):
+    identifier   → "identifier"   生成 surrogate tokens, 源值永不出境
+    numeric      → "copula"       Gaussian Copula 多变量联合采样
+    categorical  → "auto"         让 generator 按 role fallback (频率采样)
+    binary       → "auto"         同上
+    date         → "auto"         同上 (date resample + jitter)
+
+  默认 control_action (按 role + name 启发式):
+    identifier                                    → "Tokenize"
+    date                                          → "Date shift"
+    name 含 "postal" 或 "address"                 → "Coarse geography"
+    name 含 "complaint" / "note" / "text"         → "Group text"
+    numeric (其他)                                → "Preserve"
+    默认                                          → "Preserve"
+
+
+================================================================================
+B. METADATA 字段详解 — 每一项控制什么
+================================================================================
+
+每个 metadata item 是一个 dict,字段含义如下:
+
+  "column"          列名 (不可改)
+  "include"         bool, False 跳过生成 → 列不出现在 synthetic_df
+  "data_type"       推断的 semantic_role (不可改,决定 sampling 分支)
+  "strategy"        采样算法,取值:
+                      "auto"        让 generator 按 role 自动选
+                      "empirical"   基础: 源值重采样 + Gaussian 噪声
+                      "kde"         Gaussian KDE 密度估计采样 (Silverman)
+                      "copula"      Gaussian Copula 多变量联合采样
+                      "dp_laplace"  empirical + Laplace DP 噪声
+                      "identifier"  生成 surrogate tokens (覆盖 role)
+                    另外这些 legacy 名字被当作 "auto":
+                      "", "sample_plus_noise", "sample_category",
+                      "sample_plus_jitter", "new_token"
+                    (generator.py:491)
+
+  "control_action"  对源数据的泛化/脱敏操作 (对 working_series 应用,
+                    然后才做 sampling):
+                      "Preserve"                保持原样
+                      "Tokenize"                (identifier 专用,效果
+                                                 和 strategy="identifier"
+                                                 等价)
+                      "Date shift"              (日期默认,实际由 generator
+                                                 的 jitter 完成)
+                      "Month only"              日期截断到 YYYY-MM
+                      "Coarse geography"        取前 3 个字符大写
+                                                (e.g. "L4G 5K8" → "L4G")
+                      "Group text"              保留 top 8 value,
+                                                其他 → "Other"
+                      "Group rare categories"   保留 top 6 value,
+                                                其他 → "Other"
+                      "Clip extremes"           numeric: clip 到源的
+                                                5th-95th 百分位
+                      "Exclude"                 该列不生成 (和
+                                                include=False 等价)
+
+  "nullable"        bool, profiler 标记 (源里有 NaN)
+  "notes"           自由文本,只用于 UI 显示
+
+
+================================================================================
+C. CONTROLS DICT — 用户在 UI 上能调的所有生成参数
+================================================================================
+
+C.1 主要生成参数 (Step 2 UI 上部)
+----------------------------------------------------
+  "synthetic_rows"          int, 生成多少行 (default 500)
+
+  "privacy_preset"          "Maximum fidelity" / "Balanced" /
+                            "Strong privacy" / "Maximum privacy"
+  "privacy_epsilon"         float, DP 预算 ε. 若未显式设,从 preset 查表:
+                               Maximum fidelity   → ε = 10.0 (几乎没噪声)
+                               Balanced           → ε = 2.0  (中等,default)
+                               Strong privacy     → ε = 0.5
+                               Maximum privacy    → ε = 0.1  (重噪声)
+                            (dp_noise.py:26-36)
+
+  "use_copula"              bool, 是否 fit Gaussian Copula.
+                            若 True 且 numeric 列 ≥ 2 个, 用 copula 采样
+                            所有 numeric (除非 strategy 手动覆盖)
+  "copula_strength"         0..100, 向 identity matrix 混合的比例.
+                            blended = (s/100) * Σ + (1 - s/100) * I
+                            0 → 字段独立; 100 → 完整源 correlations
+                            (copula.py:228-229)
+
+  "enforce_constraints"     bool, 生成后是否自动检测 + 修复逻辑约束
+                            (non-negative, date ordering, 见 Section G)
+
+C.2 Advanced (折叠面板)
+----------------------------------------------------
+  "correlation_preservation" 0..100, anchor blending 强度.
+                             控制有多少 synthetic 行会被"拉"向源的 anchor 行.
+                             blend_strength = interp(val, [0,100], [0, 0.88])
+                             (generator.py:102)
+
+  "rare_case_retention"      0..100, 稀有行的过采样权重.
+                             retention_mix = interp(val, [0,100], [0, 0.72])
+                             anchor_weights = uniform*(1-mix) + rare*mix
+                             (generator.py:451,274)
+
+  "noise_level"              0..100, 每字段噪声 scale 乘子.
+                             numeric noise:  scale *= interp([0,100], [0.45, 1.9])
+                             date jitter:    days *= interp([0,100], [0.65, 1.65])
+                             categorical smoothing: *= interp([0,100], [0.55, 1.55])
+                             (generator.py:196, 239, 161)
+
+  "missingness_pattern"      "Preserve source pattern" → 复用 anchor 行的
+                                                         NaN mask
+                             "Reduce missingness"      → 乘 0.55
+                             "Fill gaps"               → 完全不 mask (无 NaN)
+                             (generator.py:72-79)
+
+  "outlier_strategy"         "Preserve tails"  → 不处理
+                             "Clip extremes"   → synthetic clip 到源 p5-p95
+                             "Smooth tails"    → 超界值往内 pull 0.45
+                             (generator.py:203-213)
+
+C.3 Internal / 不直接暴露
+----------------------------------------------------
+  "seed"                   int, 默认 42, RNG 种子 (生成可复现)
+  "locked_columns"         list[str], 锁定分布的列
+                           (更高 blend + 更低 noise)
+  "fidelity_priority"      0..100, default 55, 影响:
+                             categorical smoothing (interp([0,100],[0.35,0.05]))
+                             numeric noise_scale  (interp([0,100],[0.22,0.04]))
+                             date jitter_days     (interp([0,100],[10, 2]))
+                             privacy_score penalty (validator.py:171)
+
+
+================================================================================
+D. generate_synthetic_advanced() 的完整执行顺序
+================================================================================
+
+入口: src/generator.py:377
+
+    def generate_synthetic_advanced(df, metadata, controls)
+        → (synthetic_df, summary)
+
+Step 1. 解析 controls (generator.py:401-421)
+--------------------------------------------
+  row_count, seed, use_copula, copula_strength_pct, enforce_rules
+  privacy_preset → privacy_epsilon (若未设)
+  + 各种 legacy 控制 (fidelity_priority, correlation_preservation, ...)
+
+Step 2. 初始化 rng, synthetic_columns={}, strategy_log=[],
+        copula_columns=[], copula_model=None, copula_samples=None
+
+Step 3. 如果 use_copula=True (generator.py:434-446)
+--------------------------------------------
+  numeric_included = [列 for item in metadata 满足 include 且
+                      data_type==numeric 且 control_action≠Exclude]
+  if len(numeric_included) ≥ 2:
+      copula_model   = fit_copula(df, numeric_included)
+      copula_samples = sample_copula(copula_model, row_count, rng,
+                                      correlation_strength =
+                                      copula_strength_pct / 100)
+  → copula_samples 是一个 (row_count, k) DataFrame, 后续 numeric 列
+    可以直接"挑"对应列的值 (而不是独立采样)
+
+Step 4. 计算 anchor_indices (用于后续 blending) (generator.py:449-456)
+--------------------------------------------
+  uniform_weights = 1/N 对每行
+  rare_weights    = _rare_row_weights(df, metadata)
+                    (categorical 按 1/p(value) 加权, numeric outliers +0.45)
+  retention_mix   = interp(rare_case_retention, [0,100], [0, 0.72])
+  anchor_weights  = uniform*(1-retention_mix) + rare*retention_mix
+  anchor_indices  = rng.choice(N, size=row_count, p=anchor_weights)
+
+Step 5. 逐列 dispatch (generator.py:460-558)
+--------------------------------------------
+  for item in metadata:
+    if not include or control_action=="Exclude":
+        excluded_columns.append(column); continue
+
+    5a. 对 working_series 应用 control_action 的 pre-processing:
+        Coarse geography → _coarsen_geography()
+        Group text       → _group_text() (保留 top 8)
+        Group rare...    → _group_rare_categories() (保留 top 6)
+        Clip extremes    → pandas.clip(p5, p95)
+
+    5b. 解析 strategy (generator.py:489-500):
+        strategy_raw = item["strategy"].lower()
+        if 是 "" / "auto" / legacy_name:
+            role="identifier"  → strategy = "identifier"
+            role="numeric"     → strategy = "copula" if 列在 copula_columns
+                                            else "empirical"
+            else               → strategy = "auto" (走下面 elif 链)
+        else:
+            strategy = strategy_raw  (保留用户显式选择)
+
+    5c. Strategy 分支 (generator.py:505-545):
+        is_identifier_like (role==identifier 或 strategy=="identifier")
+            → _generate_identifier(column, row_count)
+               格式: <PREFIX>-00001, PREFIX 是 column_name 每个 _ 分段首字母
+               前3位大写. 若无分段则用 "SYN".
+               源 ID 永不出现.
+
+        strategy=="copula" 且 copula_samples 存在 且 列在其中
+            → 从 copula_samples[column] 取值 (已保留联合分布)
+               源若是 integer, 对采样值四舍五入
+
+        strategy=="kde" 且 role==numeric
+            → kde_sample_numeric(working_series, row_count, rng)
+               (见 Section E.3)
+
+        strategy=="dp_laplace" 且 role==numeric
+            → 先跑 _sample_numeric() 得 base
+               sensitivity = p95 - p5 (clipped floor 1e-6)
+               加 Laplace(0, sensitivity/ε) 噪声
+               (见 Section E.2)
+
+        role==numeric (默认)
+            → _sample_numeric()
+               (empirical + Gaussian noise, 见 Section E.4)
+
+        role==date
+            → _sample_dates()
+               (date resample + jitter, 见 Section E.5)
+
+        else (categorical / binary)
+            → _sample_categorical()
+               (频率 smoothing + rare boost, 见 Section E.6)
+
+    5d. Anchor blending + missingness (非 identifier):
+        anchor_source = working_series.iloc[anchor_indices]  (row_count 行)
+        anchor_ready  = _prepare_anchor_output(anchor_source, role, action)
+            numeric → to_numeric
+            date    → parse + strftime "%Y-%m-%d" 或 "YYYY-MM" (Month only)
+            其他    → reset_index
+        effective_blend = 0 if strategy=="copula" else correlation_preservation
+          (copula 已经自带 correlation, 不再 blend)
+        generated = _blend_with_anchor(generated, anchor_ready, rng,
+                                        effective_blend, locked_distribution)
+            blend_strength = interp(effective_blend, [0,100], [0, 0.88])
+            if locked_distribution: blend_strength = min(0.96, +0.12)
+            blend_mask = rng.random(n) < blend_strength
+            generated[blend_mask] = anchor_ready[blend_mask]
+        generated = _apply_missingness(generated, working_series, row_count,
+                                        rng, missingness_pattern,
+                                        anchor_source)
+            若 "Preserve source pattern": missing_mask = anchor_source.isna()
+            若 "Reduce missingness": rng<源miss_prob*0.55 → NaN
+            若 "Fill gaps": 不 mask
+
+    5e. synthetic_columns[column] = generated
+
+Step 6. synthetic_df = pd.DataFrame(synthetic_columns)
+
+Step 7. 约束修复 (generator.py:562-567)
+--------------------------------------------
+  若 enforce_rules:
+      detected_constraints = detect_constraints(df, metadata)
+      synthetic_df, constraint_repairs = enforce_constraints(synthetic_df,
+                                                              detected_constraints)
+  (见 Section G)
+
+Step 8. 组装 summary dict (generator.py:570-591)
+--------------------------------------------
+  包含 rows_generated, columns_generated, excluded_columns, privacy_epsilon,
+       copula_columns, detected_constraints, constraint_repairs, strategy_log,
+       + 所有 control 回显, generation_mode="advanced"
+
+
+================================================================================
+E. 4 种核心 SAMPLING 算法的数学
+================================================================================
+
+E.1 GAUSSIAN COPULA — src/copula.py
+----------------------------------------------------
+目的: 在保留任意 marginal 分布的同时保留 numeric 字段间的 joint correlations.
+
+Fit 阶段 (copula.py:126-178):
+  对每个 numeric 列 X_j:
+    1. rank transform:
+         ranks = X_j.rank(method="average")   (ties → 平均秩)
+         u = ranks / (N + 1)
+    2. Normal quantile:
+         z_j = Φ^(-1)(u)                      (Acklam rational approx)
+       → z_j ~ N(0, 1),分布形状无关
+    3. 存储 marginal 用于 inverse transform:
+         marginals[j] = (sorted_values, empirical_cdf = i/(N+1))
+
+  堆叠所有 z_j → Z 矩阵 (N x k)
+  Σ = np.corrcoef(Z)                          (等价于原数据的 Spearman 相关)
+  处理: NaN→0, 对角=1
+
+Sample 阶段 (copula.py:209-257):
+  1. Blend toward independence:
+       Σ_blend = s * Σ + (1 - s) * I          (s = copula_strength_pct/100)
+  2. Nearest positive-definite projection (copula.py:181-206):
+       eigendecomposition, 把 eigenvalues < 1e-8 clip 到 1e-8
+       重建后再 normalize 对角为 1
+  3. Cholesky L (fail → eigendecomp 求平方根)
+  4. 采样:
+       Z_sample = N(0, I) matrix (row_count x k)
+       Z_corr   = Z_sample @ L.T              (带 correlation 的 z)
+  5. Inverse transform 每列:
+       u_j = Φ(z_corr[:, j])                  (CDF, A&S 7.1.26 erf approx)
+       x_j = interp(u_j, empirical_cdf, sorted_values)
+     → 保留 marginal (因为 x_j 从源的经验 CDF 反解)
+
+数学保证:
+  Sklar's theorem: 任何联合分布可分解为 marginal + copula 部分.
+  Gaussian Copula 假设 copula 形状是多元正态,
+  所以 correlation 信息完全由 Σ 矩阵承载.
+  我们在 z 空间建 Σ, 在 z 空间采样, 再反映射回数据空间 → 两者都保留.
+
+E.2 DIFFERENTIAL PRIVACY LAPLACE — src/dp_noise.py
+----------------------------------------------------
+标准 DP mechanism (Dwork & Roth 2014):
+  noise ~ Laplace(0, Δf / ε)
+  这里 Δf 是 L1 sensitivity (值改变 1 条记录对输出的最大影响).
+
+实现 (dp_noise.py:52-90):
+  if ε ≤ 0:     return values  (无噪声)
+  if ε ≥ 100:   return values  (等价无噪声,避免极小 scale 浮点问题)
+
+  sensitivity 若未给, 从 p95 - p5 估计 (robust to outliers).
+  scale = sensitivity / ε
+  output = values + np.random.laplace(0, scale, size=N)
+
+Presets (dp_noise.py:26-31):
+  ε = 10.0  → scale ≈ sensitivity/10,几乎没噪声  (Maximum fidelity)
+  ε = 2.0   → scale ≈ sensitivity/2             (Balanced, default)
+  ε = 0.5   → scale ≈ 2 × sensitivity           (Strong privacy)
+  ε = 0.1   → scale ≈ 10 × sensitivity          (Maximum privacy)
+
+重要澄清 (dp_noise.py docstring):
+  这是 DP 风格的 per-value noise, 不是严格的 ε-DP release.
+  真正的 ε-DP 需要 clip, composition theorem, sensitivity accounting,
+  对所有 released 统计做预算分配. 这里只做"principled 噪声 knob"的 demo.
+
+E.3 KERNEL DENSITY ESTIMATION — src/strategies.py:20-61
+----------------------------------------------------
+Silverman's rule of thumb (statistician standard):
+  h = 1.06 * σ * n^(-1/5)
+
+Sampling (strategies.py:51-54):
+  1. 从源里均匀随机挑一个点 base_value
+  2. 加 Gaussian 噪声 noise ~ N(0, h)
+  3. sample = base + noise
+
+  若源全是 integer, 对 sample round().
+
+为什么用 KDE 而不是 empirical:
+  empirical 直接重采样源值 → 可能暴露个体记录 (privacy risk).
+  KDE 平滑成连续密度, 不对应单一源行, privacy 更好.
+  且保留 multimodal 形状 (empirical 做得到, mean+sigma 做不到).
+
+E.4 EMPIRICAL + GAUSSIAN NOISE — src/generator.py:178-221
+----------------------------------------------------
+numeric 默认 (strategy="auto" 且不在 copula_columns, 或 strategy="empirical"):
+
+  numeric = pd.to_numeric(series).dropna()
+  sampled = rng.choice(numeric, size=N, replace=True)  (有放回重采样)
+  std     = numeric.std(ddof=0)   (或 fallback 到 (max-min)/6)
+
+  noise_scale = interp(fidelity_priority, [0, 100], [0.22, 0.04])
+             × interp(noise_level,        [0, 100], [0.45, 1.90])
+  if locked_distribution:  *= 0.35
+
+  noise     = rng.normal(0, std * noise_scale, N)
+  synthetic = sampled + noise
+
+  outlier_strategy 后处理:
+    "Clip extremes"  → np.clip(synthetic, p5, p95)
+    "Smooth tails"   → 超界 pull 0.45
+
+  若列名含 age/wait/stay/ctas: clip ≥ 0
+  若源是 integer: round()
+
+E.5 DATE RESAMPLE + JITTER — src/generator.py:224-249
+----------------------------------------------------
+  parsed = pd.to_datetime(series)
+  sampled = rng.choice(parsed, size=N)
+  jitter_days = round(interp(fidelity_priority, [0, 100], [10, 2]))
+              × interp(noise_level, [0, 100], [0.65, 1.65])
+  if locked_distribution: × 0.45
+  jitter = rng.integers(-jitter_days, jitter_days + 1, N)
+  jittered = sampled + timedelta(days=jitter)
+
+  若 control_action == "Month only":
+      result = jittered.to_period("M")   (YYYY-MM)
+  else:
+      result = jittered.strftime("%Y-%m-%d")
+
+E.6 CATEGORICAL FREQUENCY SAMPLING — src/generator.py:146-175
+----------------------------------------------------
+  probabilities = value_counts(normalize=True).sort_index()  (源的 PMF)
+
+  smoothing = interp(fidelity_priority, [0, 100], [0.35, 0.05])
+            × interp(noise_level,       [0, 100], [0.55, 1.55])
+  if locked_distribution: × 0.35
+
+  uniform  = 1 / k  (k = unique value 数)
+  smoothed = P * (1 - smoothing) + uniform * smoothing
+
+  Rare case boost (若 rare_case_retention > 0):
+      rare_threshold = P.quantile(0.35)
+      boost = interp(rare_case_retention, [0, 100], [1.0, 1.85])
+      smoothed[P ≤ rare_threshold] *= boost
+
+  smoothed /= smoothed.sum()  (renormalize)
+  sample   = rng.choice(values, size=N, p=smoothed)
+
+
+================================================================================
+F. ANCHOR BLENDING + RARE CASE RETENTION
+================================================================================
+
+目的: 让非 copula 字段之间也能保留一部分 row-level 关联 (跨字段).
+
+思路: 先为每个 synthetic 行选一个源行作为 "anchor", 然后以一定概率 blend
+      当前字段的 generated 值向 anchor 行的对应值靠.
+
+Rare row weights (generator.py:114-143):
+  每行权重 = 1.0 + sum of 字段 rarity 贡献
+  categorical: rarity = 1 / P(value), normalized to median; 贡献 [0, 2]
+  numeric:     outliers (p5-p95 外) 贡献 0.45
+  归一 → 概率分布
+
+Anchor 采样:
+  retention_mix = interp(rare_case_retention, [0, 100], [0, 0.72])
+  anchor_w      = uniform * (1 - retention_mix) + rare_w * retention_mix
+  anchor_idx    = rng.choice(N_src, size=row_count, p=anchor_w)
+
+  rare_case_retention = 0  → 完全均匀采源行 (忽略 rarity)
+  rare_case_retention = 100 → 72% 按 rarity, 28% uniform
+                              (稀有行被过采样)
+
+Blending 强度 (generator.py:95-111):
+  blend_strength = interp(correlation_preservation, [0, 100], [0, 0.88])
+  if locked_distribution: blend_strength = min(0.96, +0.12)
+
+  blend_mask = rng.random(n) < blend_strength
+  generated[blend_mask] = anchor_ready[blend_mask]
+
+  correlation_preservation = 0   → 字段独立生成 (纯算法驱动)
+  correlation_preservation = 100 → 88% 行的值 = anchor 行的值
+                                   (几乎等价 row resample)
+
+重要: 对 strategy="copula" 的字段, effective_blend = 0 (不再 blend).
+      Copula 已经在 joint 分布上做了 correlation, 再 blend 会双重影响.
+
+Missingness (generator.py:61-81):
+  "Preserve source pattern"   + anchor_source: missing_mask = anchor.isna()
+                                                (保持 row-level pattern)
+  "Reduce missingness":       missing_mask = rng < miss_prob × 0.55
+  "Fill gaps":                 不 mask (不留 NaN)
+
+
+================================================================================
+G. CONSTRAINT 自动检测 + 修复 — src/constraints.py
+================================================================================
+
+detect_constraints() (constraints.py:66-138) 扫两类:
+
+G.1 Non-negative numeric (constraints.py:86-106)
+----------------------------------------------------
+  对每个 numeric 列:
+    if (values ≥ 0).all() 且 len ≥ 5 且 name 含
+    [age | wait | stay | count | duration | length | minutes
+     | hours | days | ctas | score | visits]:
+      add constraint: { kind: "non_negative", columns: [col],
+                        rule: "col >= 0", confidence: 1.0 }
+
+  设计约束:
+    keyword 过滤是防误报 (例如 "price" 可能有负值,
+    即使源恰好都是正的也别锁死)
+
+G.2 Date ordering pairs (constraints.py:108-136)
+----------------------------------------------------
+  date_cols = [c for c in df if _is_date_column(c)]
+  _is_date_column: 非 numeric dtype, 样本解析 ≥85% 成功,
+                   年份在 [1970, 2100]
+
+  对所有 (col_a, col_b) pair:
+    a_le_b_rate = (a_vals ≤ b_vals).mean()
+    if rate ≥ 0.95:
+        add: { kind: "date_order", columns: [a, b],
+               rule: "a ≤ b", confidence: rate }
+    elif b_le_a_rate ≥ 0.95:
+        add: { kind: "date_order", columns: [b, a],
+               rule: "b ≤ a", confidence: rate }
+
+enforce_constraints() (constraints.py:141-196):
+----------------------------------------------------
+  非负修复:
+    bad_mask = numeric < 0
+    numeric[bad_mask] = 0       (clip 负值)
+    repair record: rows_repaired = bad_mask.sum()
+
+  日期顺序修复:
+    violated = a_parsed > b_parsed (两列都非 NaN)
+    swap: df[a], df[b] = df[b], df[a] 在 violated 行
+    repair record: rows_repaired = violated.sum(),
+                    action = "Swapped N row(s)"
+
+在 sample_data.csv 上的表现 (测试结果):
+  7 条规则: 4 non-negative (ctas/age/wait/length) +
+            3 date_order (visit≤admission, visit≤discharge,
+                          admission≤discharge)
+  约 48 行被 swap-repaired (从 50 行 synthetic 中).
+
+
+================================================================================
+H. VALIDATION — src/validator.py
+================================================================================
+
+输出 4 个 0-100 分数: fidelity / privacy / correlation / overall.
+
+H.1 Fidelity score (validator.py:112-144)
+----------------------------------------------------
+  每个非 identifier 列计算一个 per-column score, 然后 mean:
+
+  numeric (validator.py:9-28):
+    mean_gap     = |mean_orig - mean_syn| / max(|mean_orig|, 1)
+    std_gap      = |std_orig - std_syn| / max(std_orig, 1)
+    quantile_gap = mean(|q_orig - q_syn|) / max(std_orig, 1)
+                   (q = [0.25, 0.5, 0.75])
+    penalty = mean(mean_gap, std_gap, quantile_gap)
+    score   = max(0, 1 - penalty) × 100
+
+  categorical (validator.py:31-46):
+    TV distance = 0.5 * sum(|P_orig - P_syn|)
+    score       = max(0, 1 - TV) × 100
+
+H.2 Privacy score (validator.py:146-178)
+----------------------------------------------------
+  exact_overlap_rate:
+    非 date/identifier 列拼成 signature string,
+    统计 synthetic signatures 中有多少在源中出现过
+    overlap_rate = |sig_orig ∩ sig_syn| / max(|sig_syn|, 1)
+
+  identifier_overlap:
+    identifier 列里有多少 value 在源中出现过
+    (用了 "identifier" strategy 应该为 0)
+
+  privacy_pressure = (fidelity_priority / 100) × 10
+                     (slider 越偏向 fidelity, privacy 扣 分)
+
+  privacy_score = clip(100 - overlap_rate × 100
+                           - identifier_overlap × 10
+                           - privacy_pressure, 0, 100)
+
+H.3 Correlation score (validator.py:49-109)
+----------------------------------------------------
+  只看 numeric 列 (需要 ≥ 2):
+    Σ_orig  = orig_numeric.corr()
+    Σ_syn   = synth_numeric.corr()
+    diff    = Σ_orig - Σ_syn
+    frob_d  = sqrt((diff²).sum())
+    max_d   = sqrt(k*(k-1) * 4)    (理论上 off-diagonal 从 +1 翻到 -1)
+    norm_d  = min(1, frob_d / max_d)
+    score   = (1 - norm_d) × 100
+
+  另外计算 top drift pairs (|Σ_orig_ij - Σ_syn_ij| 排序),
+  给 UI preview tab 显示.
+
+H.4 Overall score
+----------------------------------------------------
+  overall = fidelity × 0.6 + privacy × 0.4   (注: 不含 correlation!)
+
+  verdict thresholds:
+    ≥ 85 → "Demo ready: representative with comfortable privacy buffer"
+    ≥ 70 → "Good baseline: review weaker columns"
+    < 70 → "Needs another pass: adjust metadata or controls"
+
+
+================================================================================
+  END — 一句话总结 pipeline
+================================================================================
+
+source CSV
+  ↓  profiler 推 semantic_role + 统计 profile
+  ↓  metadata_builder 按 role 配默认 strategy + control_action
+  ↓  UI 允许 analyst 改 include / strategy / control_action / notes
+  ↓  manager 审 metadata + 生成的 preview + quality metrics
+generate_synthetic_advanced():
+  · 如果 use_copula: fit Gaussian Copula 在 numeric 列
+  · 采 anchor_indices (mix uniform + rare_case_retention 加权)
+  · 每列按 strategy dispatch (identifier / copula / kde / dp_laplace
+    / empirical / date / categorical)
+  · non-identifier 列: blend 向 anchor 行 (copula 字段跳过)
+  · 应用 missingness pattern
+  · enforce_constraints: 自动检测 + 修复 non-negative & date ordering
+validator 打 4 个分数 → manager 审 → download approved package
+
+所有 metadata + controls 的决定都进 audit log. 源记录永不出现在
+synthetic output (identifier 生成的是 surrogate token, 其他字段
+经 statistical transformation, 不可逆).

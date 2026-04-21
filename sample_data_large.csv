@@ -1,0 +1,601 @@
+encounter_id,visit_date,admission_datetime,discharge_datetime,arrival_mode,ctas_level,chief_complaint,age,sex,wait_time_min,length_of_stay_hr,diagnosis_group,disposition,admitted,revisit_72h,language,postal_prefix
+ER-1001,2026-01-21,2026-01-21 02:08,2026-01-21 09:15,Walk-in,3,Fall,52,M,94,7.1,Orthopedic,Discharged,No,No,English,L4G
+ER-1002,2025-11-21,2025-11-21 18:34,2025-11-22 14:01,Ambulance,2,Stroke symptoms,54,F,29,19.4,Neuro,Admitted,Yes,No,English,L4N
+ER-1003,2026-01-13,2026-01-13 15:42,2026-01-14 05:57,Walk-in,2,Abdominal pain,48,F,22,14.2,GI,Admitted,Yes,No,Arabic,L6A
+ER-1004,2025-12-19,2025-12-19 10:31,2025-12-19 21:57,Walk-in,4,Ankle injury,64,M,633,11.5,Orthopedic,Admitted,Yes,No,English,M2K
+ER-1005,2026-02-04,2026-02-04 10:23,2026-02-04 14:03,Walk-in,4,Fall,18,F,80,3.6,Orthopedic,Discharged,No,Yes,French,M4W
+ER-1006,2025-11-15,2025-11-15 20:36,2025-11-16 03:12,Ambulance,3,Fall,59,F,62,6.6,Orthopedic,Left Without Being Seen,No,No,English,L6A
+ER-1007,2026-02-08,2026-02-08 02:03,2026-02-08 04:07,Referral,4,Fever,34,F,257,2.1,Infection,Discharged,No,No,English,L3R
+ER-1008,2026-01-17,2026-01-17 16:44,2026-01-17 19:20,Walk-in,5,Mental health crisis,46,M,172,2.6,Mental Health,Discharged,No,No,Spanish,L3R
+ER-1009,2026-02-24,2026-02-24 04:50,2026-02-25 12:49,Walk-in,1,Stroke symptoms,27,F,9,31.9,Neuro,Admitted,Yes,No,English,L3R
+ER-1010,2025-11-13,2025-11-13 02:15,2025-11-14 05:55,Walk-in,1,Stroke symptoms,44,F,4,27.6,Neuro,Admitted,Yes,No,English,L4S
+ER-1011,2025-11-22,2025-11-22 12:38,2025-11-23 00:12,Walk-in,3,Difficulty breathing,39,F,74,11.5,Respiratory,Discharged,No,No,,L3R
+ER-1012,2026-02-18,2026-02-18 23:24,2026-02-19 03:12,Walk-in,5,Chest pain,50,F,165,3.8,Cardiac,Observation,No,No,Tagalog,M2K
+ER-1013,2025-12-04,2025-12-04 17:39,2025-12-04 19:54,Walk-in,4,Rash,94,F,204,2.2,Infection,Discharged,No,No,English,L4P
+ER-1014,2026-01-23,2026-01-23 18:16,2026-01-23 20:21,Walk-in,5,Rash,22,F,138,2.1,Infection,Observation,No,No,English,M2K
+ER-1015,2025-12-25,2025-12-25 17:13,2025-12-26 21:51,Ambulance,1,Chest pain,50,F,12,28.6,Cardiac,Admitted,Yes,No,English,L6A
+ER-1016,2025-11-27,2025-11-27 18:51,2025-11-28 00:11,Ambulance,2,Headache,13,M,34,5.3,Neuro,Left Without Being Seen,No,No,English,L6A
+ER-1017,2025-12-05,2025-12-05 12:19,2025-12-05 15:04,Walk-in,4,Headache,71,F,162,2.8,Neuro,Observation,No,No,French,M4W
+ER-1018,2026-03-01,2026-03-01 03:04,2026-03-01 07:13,Walk-in,3,Fall,52,M,390,4.2,Orthopedic,Discharged,No,No,French,L4S
+ER-1019,2026-02-03,2026-02-03 20:09,2026-02-04 16:28,Ambulance,2,Mental health crisis,76,F,28,20.4,Mental Health,Admitted,Yes,No,English,M4W
+ER-1020,2026-02-15,2026-02-15 10:48,2026-02-15 17:32,Walk-in,3,Rash,60,M,102,6.8,Infection,Discharged,No,No,English,L6A
+ER-1021,2026-02-12,2026-02-12 12:00,2026-02-13 00:35,Walk-in,2,Fever,77,M,37,12.6,Infection,Discharged,No,No,English,M2K
+ER-1022,2026-01-29,2026-01-29 08:53,2026-01-29 17:17,Walk-in,4,Chest pain,42,M,76,8.4,Cardiac,Discharged,No,No,French,L3R
+ER-1023,2025-12-02,2025-12-02 04:22,2025-12-02 11:24,Ambulance,3,Fall,13,F,34,7.1,Orthopedic,Discharged,No,No,English,L6A
+ER-1024,2025-12-24,2025-12-24 22:14,2025-12-25 00:19,Walk-in,5,Fever,41,M,264,2.1,Infection,Discharged,No,No,Spanish,M4W
+ER-1025,2026-01-25,2026-01-25 18:45,2026-01-25 22:16,Walk-in,4,Medication refill,73,X,461,3.5,Minor injury,Discharged,No,Yes,English,L3R
+ER-1026,2025-12-24,2025-12-24 15:27,2025-12-24 17:36,Walk-in,4,Abdominal pain,2,M,58,2.2,GI,Discharged,No,No,French,L4G
+ER-1027,2026-01-29,2026-01-29 09:39,2026-01-29 12:37,Walk-in,3,Sepsis concern,16,F,129,3.0,Infection,Discharged,No,No,English,M4W
+ER-1028,2026-01-16,2026-01-16 19:44,2026-01-17 10:25,Ambulance,2,Chest pain,22,F,31,14.7,Cardiac,Discharged,No,No,English,M4W
+ER-1029,2026-01-08,2026-01-08 13:05,2026-01-09 03:35,Ambulance,2,Dizziness,43,M,13,14.5,Neuro,Admitted,Yes,No,English,M4W
+ER-1030,2026-01-11,2026-01-11 10:38,2026-01-11 19:31,Walk-in,3,Mental health crisis,27,M,87,8.9,Mental Health,Discharged,No,No,English,L4G
+ER-1031,2025-12-13,2025-12-13 10:48,2025-12-13 16:45,Walk-in,3,Dizziness,45,F,40,5.9,Neuro,Discharged,No,No,Punjabi,L4N
+ER-1032,2025-11-02,2025-11-02 05:27,2025-11-02 15:37,Ambulance,2,Back pain,57,M,43,10.2,Orthopedic,Discharged,No,No,English,L4G
+ER-1033,2025-12-22,2025-12-22 02:12,2025-12-22 12:41,Walk-in,3,Chest pain,67,F,56,10.5,Cardiac,Discharged,No,No,English,M4W
+ER-1034,2025-11-27,2025-11-27 13:18,2025-11-27 16:47,Walk-in,4,Fall,0,F,89,3.5,Orthopedic,Discharged,No,No,English,L4G
+ER-1035,2026-01-24,2026-01-24 21:18,2026-01-25 15:33,Ambulance,2,Mental health crisis,14,M,17,18.3,Mental Health,Admitted,Yes,No,Punjabi,L4N
+ER-1036,2026-01-17,2026-01-17 01:31,2026-01-17 07:27,Walk-in,3,Abdominal pain,36,M,135,5.9,GI,Left Without Being Seen,No,No,English,L4G
+ER-1037,2025-11-12,2025-11-12 20:35,2025-11-13 05:20,Walk-in,3,Laceration,24,F,113,8.8,Minor injury,Discharged,No,No,English,L4S
+ER-1038,2025-12-23,2025-12-23 19:51,2025-12-23 22:25,Walk-in,4,Sepsis concern,6,M,158,2.6,Infection,Discharged,No,No,English,L3R
+ER-1039,2026-02-16,2026-02-16 06:38,2026-02-16 09:47,Referral,5,Dizziness,38,M,219,3.1,Neuro,Observation,No,No,English,L6A
+ER-1040,2026-02-28,2026-02-28 15:09,2026-02-28 21:14,Ambulance,3,Fall,35,F,63,6.0,Orthopedic,Discharged,No,No,English,L3R
+ER-1041,2025-11-30,2025-11-30 03:57,2025-11-30 19:17,Ambulance,1,Laceration,44,M,7,15.3,Minor injury,,Yes,No,English,L4G
+ER-1042,2026-02-20,2026-02-20 18:11,2026-02-21 06:10,Walk-in,2,Back pain,10,M,24,11.9,Orthopedic,Discharged,No,No,Arabic,M4W
+ER-1043,2025-12-07,2025-12-07 16:48,2025-12-07 20:52,Referral,4,Abdominal pain,72,M,158,4.0,GI,Discharged,No,No,English,L4P
+ER-1044,2026-01-19,2026-01-19 08:30,2026-01-19 16:18,Ambulance,3,Difficulty breathing,64,F,84,7.8,Respiratory,Discharged,No,No,English,L4N
+ER-1045,2025-11-26,2025-11-26 01:37,2025-11-26 10:46,Referral,3,Difficulty breathing,30,F,114,9.1,Respiratory,Discharged,No,No,English,L4G
+ER-1046,2025-12-03,2025-12-03 23:17,2025-12-04 04:15,Walk-in,4,Back pain,60,M,591,5.0,Orthopedic,Discharged,No,No,English,L4N
+ER-1047,2025-11-22,2025-11-22 10:41,2025-11-22 13:35,Walk-in,5,Difficulty breathing,32,M,309,2.9,Respiratory,Left Without Being Seen,No,No,Punjabi,M4W
+ER-1048,2026-01-14,2026-01-14 21:26,2026-01-15 02:38,Walk-in,3,Sepsis concern,90,F,28,5.2,Infection,Discharged,No,No,French,L3R
+ER-1049,2026-02-22,2026-02-22 16:16,2026-02-22 18:51,Walk-in,4,Medication refill,27,M,152,2.5,Minor injury,Observation,No,No,Arabic,M4W
+ER-1050,2025-12-18,2025-12-18 18:40,2025-12-19 03:26,Walk-in,2,Sepsis concern,12,F,15,8.7,Infection,Discharged,No,No,French,L4G
+ER-1051,2026-02-13,2026-02-13 18:14,2026-02-14 11:02,Ambulance,1,Stroke symptoms,53,F,3,16.8,Neuro,Admitted,Yes,No,English,L4G
+ER-1052,2025-11-09,2025-11-09 04:40,2025-11-09 08:24,Walk-in,4,Sepsis concern,15,F,173,3.7,Infection,Discharged,No,No,French,L4N
+ER-1053,2025-11-10,2025-11-10 08:44,2025-11-11 04:29,Ambulance,1,Stroke symptoms,62,M,9,19.8,Neuro,Admitted,Yes,No,English,M4W
+ER-1054,2025-12-14,2025-12-14 11:12,2025-12-15 09:51,Ambulance,2,Medication refill,53,F,35,22.6,Minor injury,Admitted,Yes,No,Punjabi,L3R
+ER-1055,2025-12-13,2025-12-13 11:56,2025-12-13 19:57,Walk-in,3,Laceration,26,M,370,8.0,Minor injury,Discharged,No,No,English,L3R
+ER-1056,2026-02-07,2026-02-07 01:03,2026-02-07 10:27,Ambulance,2,Fever,12,M,274,9.4,Infection,Discharged,No,No,English,L6A
+ER-1057,2025-12-14,2025-12-14 13:07,2025-12-14 18:04,Walk-in,4,Rash,50,F,58,4.9,Infection,Discharged,No,Yes,English,M4W
+ER-1058,2026-01-02,2026-01-02 03:42,2026-01-02 16:55,Walk-in,2,Rash,16,F,268,13.2,Infection,Observation,No,No,English,L4S
+ER-1059,2025-11-10,2025-11-10 17:50,2025-11-11 00:09,Walk-in,4,Chest pain,37,F,154,6.4,Cardiac,Discharged,No,No,English,L4P
+ER-1060,2025-11-11,2025-11-11 16:23,2025-11-11 18:33,Walk-in,4,Rash,48,F,244,2.2,Infection,Discharged,No,No,Spanish,L4P
+ER-1061,2026-02-06,2026-02-06 22:08,2026-02-07 00:16,Walk-in,5,Shortness of breath,28,M,366,2.2,Respiratory,Discharged,No,No,French,L4P
+ER-1062,2025-11-08,2025-11-08 17:52,2025-11-09 11:01,Walk-in,2,Rash,27,M,13,17.1,Infection,Admitted,Yes,No,English,L4G
+ER-1063,2025-12-14,2025-12-14 08:47,2025-12-14 11:42,Referral,4,Abdominal pain,54,F,157,3.0,GI,Discharged,No,No,English,L4P
+ER-1064,2026-02-18,2026-02-18 23:13,2026-02-19 06:46,Walk-in,3,Back pain,61,M,43,7.6,Orthopedic,Discharged,No,No,English,L4S
+ER-1065,2026-01-07,2026-01-07 09:51,2026-01-07 13:46,Walk-in,4,Laceration,65,M,132,3.9,Minor injury,Discharged,No,No,English,L4S
+ER-1066,2025-11-20,2025-11-20 07:49,2025-11-20 13:57,Walk-in,4,Shortness of breath,48,F,138,6.1,Respiratory,Discharged,No,No,Punjabi,L3R
+ER-1067,2026-02-07,2026-02-07 21:43,2026-02-07 23:37,Walk-in,4,Medication refill,34,F,199,1.9,Minor injury,Discharged,No,No,English,L4S
+ER-1068,2025-11-12,2025-11-12 08:53,2025-11-12 11:51,Referral,5,Ankle injury,52,M,83,2.9,Orthopedic,Discharged,No,No,English,M2K
+ER-1069,2026-01-29,2026-01-29 01:49,2026-01-29 12:30,Ambulance,2,Difficulty breathing,55,F,17,10.6,Respiratory,Discharged,No,No,English,L4N
+ER-1070,2026-01-13,2026-01-13 11:16,2026-01-13 18:48,Walk-in,3,Back pain,46,F,70,7.6,Orthopedic,Discharged,No,Yes,,L4S
+ER-1071,2025-12-18,2025-12-18 19:05,2025-12-19 04:04,Walk-in,3,Fever,61,M,38,8.9,Infection,Discharged,No,Yes,English,L6A
+ER-1072,2025-11-05,2025-11-05 04:32,2025-11-05 08:57,Walk-in,5,Chest pain,53,M,231,4.4,Cardiac,Left Without Being Seen,No,No,English,M2K
+ER-1073,2025-12-20,2025-12-20 11:06,2025-12-20 15:49,Walk-in,4,Shortness of breath,0,M,250,4.7,Respiratory,Discharged,No,No,English,L4N
+ER-1074,2026-02-20,2026-02-20 03:07,2026-02-20 10:39,Referral,3,Laceration,46,X,32,7.6,Minor injury,Discharged,No,No,French,L4G
+ER-1075,2026-01-12,2026-01-12 16:28,2026-01-12 20:29,Walk-in,4,Back pain,67,M,191,4.0,Orthopedic,Discharged,No,No,,L4G
+ER-1076,2025-12-07,2025-12-07 11:25,2025-12-08 01:15,Ambulance,2,Difficulty breathing,38,F,12,13.8,Respiratory,Discharged,No,Yes,Punjabi,L4P
+ER-1077,2025-12-17,2025-12-17 07:55,2025-12-17 09:50,Walk-in,5,Headache,50,M,254,1.9,Neuro,Observation,No,No,French,L4S
+ER-1078,2025-12-11,2025-12-11 05:26,2025-12-11 09:09,Walk-in,4,Dizziness,29,M,77,3.8,Neuro,Discharged,No,No,,M4W
+ER-1079,2026-03-01,2026-03-01 13:32,2026-03-01 16:50,Walk-in,5,Rash,45,M,134,3.3,Infection,Discharged,No,No,French,L6A
+ER-1080,2026-01-22,2026-01-22 16:04,2026-01-23 01:33,Ambulance,3,Fall,78,M,78,9.4,Orthopedic,Admitted,Yes,No,English,L4N
+ER-1081,2026-01-17,2026-01-17 22:34,2026-01-18 15:42,Walk-in,2,Stroke symptoms,58,F,43,17.1,Neuro,Admitted,Yes,No,English,L6A
+ER-1082,2025-12-11,2025-12-11 10:29,2025-12-11 16:37,Walk-in,4,Shortness of breath,44,M,172,6.2,Respiratory,Discharged,No,No,English,M2K
+ER-1083,2025-12-26,2025-12-26 03:51,2025-12-26 06:02,Walk-in,4,Fall,47,F,190,2.1,Orthopedic,Discharged,No,No,English,L4N
+ER-1084,2025-12-17,2025-12-17 19:59,2025-12-18 09:10,Ambulance,2,Mental health crisis,24,F,225,13.1,Mental Health,Observation,No,No,English,L6A
+ER-1085,2026-01-30,2026-01-30 15:06,2026-01-30 20:02,Walk-in,5,Difficulty breathing,22,M,368,5.0,Respiratory,Observation,No,No,French,L4N
+ER-1086,2026-02-16,2026-02-16 16:48,2026-02-17 08:51,Walk-in,2,Ankle injury,71,M,15,16.0,Orthopedic,Admitted,Yes,No,English,M2K
+ER-1087,2026-01-24,2026-01-24 02:20,2026-01-24 08:25,Walk-in,3,Medication refill,69,F,70,6.1,Minor injury,Discharged,No,No,English,L3R
+ER-1088,2026-01-30,2026-01-30 07:29,2026-01-30 17:54,Walk-in,3,Difficulty breathing,90,M,126,10.4,Respiratory,Discharged,No,No,Spanish,M4W
+ER-1089,2026-01-01,2026-01-01 18:25,2026-01-01 19:12,Walk-in,5,Fall,41,M,370,0.8,Orthopedic,Observation,No,No,English,L4S
+ER-1090,2026-02-28,2026-02-28 19:58,2026-03-01 06:25,Ambulance,2,Difficulty breathing,34,F,26,10.4,Respiratory,Observation,No,Yes,English,L4G
+ER-1091,2026-02-20,2026-02-20 10:26,2026-02-21 03:07,,2,Chest pain,36,X,26,16.6,Cardiac,Discharged,No,No,English,L3R
+ER-1092,2026-01-26,2026-01-26 19:18,2026-01-27 12:27,Ambulance,2,Shortness of breath,41,M,33,17.1,Respiratory,Admitted,Yes,Yes,French,L6A
+ER-1093,2025-12-04,2025-12-04 20:12,2025-12-05 03:41,Walk-in,2,Ankle injury,60,F,40,7.4,Orthopedic,Observation,No,No,French,L4N
+ER-1094,2026-02-25,2026-02-25 09:17,2026-02-25 14:58,Walk-in,4,Mental health crisis,59,M,197,5.6,Mental Health,Discharged,No,No,English,L4S
+ER-1095,2026-01-14,2026-01-14 21:33,2026-01-14 22:28,Walk-in,5,Dizziness,19,F,99,1.0,Neuro,Discharged,No,Yes,English,L4G
+ER-1096,2026-02-28,2026-02-28 06:55,2026-02-28 11:28,Walk-in,4,Rash,53,M,241,4.6,Infection,Left Without Being Seen,No,No,Spanish,L3R
+ER-1097,2025-11-23,2025-11-23 05:44,2025-11-23 11:28,Referral,4,Medication refill,43,F,50,5.7,Minor injury,Discharged,No,No,English,M2K
+ER-1098,2026-02-07,2026-02-07 16:22,2026-02-08 00:29,Referral,3,Fever,29,F,434,8.1,Infection,Observation,No,No,English,L3R
+ER-1099,2025-12-11,2025-12-11 15:16,2025-12-12 21:05,Walk-in,1,Stroke symptoms,41,M,4,29.9,Neuro,Admitted,Yes,No,French,L6A
+ER-1100,2025-11-20,2025-11-20 03:21,2025-11-20 08:59,Walk-in,4,Shortness of breath,58,F,102,5.7,Respiratory,Observation,No,No,English,M4W
+ER-1101,2025-11-25,2025-11-25 19:59,2025-11-26 01:47,Walk-in,4,Medication refill,8,F,239,5.8,Minor injury,Discharged,No,No,Spanish,L4N
+ER-1102,2026-01-17,2026-01-17 04:47,2026-01-17 12:00,Ambulance,3,Medication refill,17,M,124,7.2,Minor injury,Discharged,No,No,English,L3R
+ER-1103,2026-02-19,2026-02-19 19:19,2026-02-20 18:27,Walk-in,2,Back pain,17,M,26,23.2,Orthopedic,Admitted,Yes,No,Arabic,L3R
+ER-1104,2025-12-16,2025-12-16 00:10,2025-12-16 08:36,Walk-in,3,Difficulty breathing,35,M,107,8.5,Respiratory,Observation,No,Yes,Mandarin,L4G
+ER-1105,2026-01-25,2026-01-25 19:07,2026-01-25 22:03,Referral,4,Difficulty breathing,74,F,49,3.0,Respiratory,Left Without Being Seen,No,Yes,Mandarin,M4W
+ER-1106,2025-12-21,2025-12-21 18:53,2025-12-21 20:42,Walk-in,4,Medication refill,48,F,223,1.8,Minor injury,Observation,No,No,Arabic,L4G
+ER-1107,2026-02-09,2026-02-09 18:43,2026-02-09 19:50,Walk-in,5,Headache,60,M,360,1.2,Neuro,Discharged,No,No,Spanish,L4G
+ER-1108,2025-12-09,2025-12-09 15:57,2025-12-09 19:28,Walk-in,4,Ankle injury,37,M,218,3.5,Orthopedic,Observation,No,No,,L4S
+ER-1109,2025-12-21,2025-12-21 11:19,2025-12-22 02:13,Referral,1,Stroke symptoms,19,F,4,14.9,Neuro,Admitted,Yes,No,French,M4W
+ER-1110,2025-12-11,2025-12-11 16:55,2025-12-12 07:49,,2,Abdominal pain,15,F,31,14.9,GI,Admitted,Yes,Yes,English,M4W
+ER-1111,2026-02-01,2026-02-01 06:39,2026-02-01 10:23,Referral,4,Ankle injury,56,F,122,3.7,Orthopedic,Discharged,No,No,,L4S
+ER-1112,2025-12-21,2025-12-21 18:44,2025-12-21 21:32,Walk-in,5,Medication refill,65,F,241,2.8,Minor injury,Discharged,No,No,English,M2K
+ER-1113,2025-12-12,2025-12-12 13:20,2025-12-12 18:41,Walk-in,4,Medication refill,59,X,91,5.3,Minor injury,Left Without Being Seen,No,No,Punjabi,L3R
+ER-1114,2025-12-03,2025-12-03 11:00,2025-12-03 13:33,Walk-in,5,Laceration,39,F,376,2.5,Minor injury,Discharged,No,No,Punjabi,L4G
+ER-1115,2025-12-16,2025-12-16 12:08,2025-12-16 17:55,,4,Chest pain,25,M,129,5.7,Cardiac,Discharged,No,No,English,M2K
+ER-1116,2025-11-11,2025-11-11 13:38,2025-11-11 20:47,Walk-in,3,Back pain,19,F,125,7.1,Orthopedic,Discharged,No,No,Punjabi,L4P
+ER-1117,2026-02-03,2026-02-03 00:53,2026-02-03 05:59,Walk-in,4,Shortness of breath,34,F,249,5.1,Respiratory,Discharged,No,No,English,M2K
+ER-1118,2026-01-08,2026-01-08 03:21,2026-01-09 10:03,Walk-in,1,Stroke symptoms,67,F,5,30.7,Neuro,Admitted,Yes,No,English,M4W
+ER-1119,2025-11-11,2025-11-11 05:53,2025-11-12 04:56,Walk-in,1,Stroke symptoms,46,F,3,23.1,Neuro,Admitted,Yes,No,English,L6A
+ER-1120,2026-01-19,2026-01-19 02:44,2026-01-19 05:39,Walk-in,5,Sepsis concern,57,F,169,2.9,Infection,Discharged,No,No,Punjabi,M4W
+ER-1121,2025-12-07,2025-12-07 10:33,2025-12-07 13:53,Walk-in,4,Dizziness,49,M,191,3.4,Neuro,Observation,No,No,Arabic,L4G
+ER-1122,2025-11-05,2025-11-05 16:02,2025-11-05 17:07,Walk-in,5,Sepsis concern,19,F,130,1.0,Infection,Observation,No,No,English,M4W
+ER-1123,2025-12-12,2025-12-12 15:42,2025-12-13 02:46,Referral,3,Rash,41,X,111,11.0,Infection,Admitted,Yes,No,English,L4G
+ER-1124,2026-01-02,2026-01-02 11:18,2026-01-02 16:38,Walk-in,4,Fall,91,F,64,5.4,Orthopedic,Discharged,No,No,English,L4P
+ER-1125,2026-01-29,2026-01-29 20:31,2026-01-29 23:04,Walk-in,5,Abdominal pain,0,M,323,2.5,GI,,No,No,English,L3R
+ER-1126,2025-11-21,2025-11-21 13:33,2025-11-21 15:23,Walk-in,5,Fever,82,F,137,1.9,Infection,Observation,No,No,English,L4P
+ER-1127,2026-01-23,2026-01-23 01:54,2026-01-23 14:26,Walk-in,2,Headache,33,F,394,12.5,Neuro,Admitted,Yes,No,Arabic,L6A
+ER-1128,2026-02-20,2026-02-20 18:21,2026-02-21 00:16,Walk-in,2,Back pain,47,M,18,6.0,Orthopedic,Discharged,No,No,English,L3R
+ER-1129,2025-11-18,2025-11-18 13:47,2025-11-18 22:05,Walk-in,3,Abdominal pain,16,F,509,8.3,GI,Discharged,No,No,English,M4W
+ER-1130,2026-01-07,2026-01-07 15:13,2026-01-07 17:51,Ambulance,3,Fever,24,M,41,2.6,Infection,Discharged,No,No,English,L3R
+ER-1131,2026-01-04,2026-01-04 13:34,2026-01-04 18:13,Walk-in,4,Laceration,19,M,84,4.6,Minor injury,Discharged,No,No,Mandarin,L4P
+ER-1132,2025-11-08,2025-11-08 13:17,2025-11-08 19:10,Walk-in,3,Laceration,64,M,32,5.9,Minor injury,Observation,No,No,Punjabi,L4G
+ER-1133,2025-12-05,2025-12-05 02:10,2025-12-05 07:09,Ambulance,3,Headache,87,F,33,4.9,Neuro,Discharged,No,No,English,L4G
+ER-1134,2026-01-05,2026-01-05 13:25,2026-01-06 04:28,Walk-in,3,Fever,53,F,74,15.0,Infection,Admitted,Yes,No,English,M4W
+ER-1135,2025-11-29,2025-11-29 19:04,2025-11-30 10:19,Ambulance,3,Chest pain,69,F,133,15.3,Cardiac,Admitted,Yes,No,English,L4N
+ER-1136,2025-12-02,2025-12-02 07:17,2025-12-03 04:07,Walk-in,2,Laceration,56,M,8,20.8,Minor injury,Admitted,Yes,No,Arabic,L4N
+ER-1137,2026-02-23,2026-02-23 14:28,2026-02-23 19:01,Ambulance,3,Laceration,2,F,37,4.5,Minor injury,Discharged,No,No,English,L6A
+ER-1138,2025-11-10,2025-11-10 00:44,2025-11-10 02:36,Referral,4,Back pain,90,M,84,1.9,Orthopedic,Discharged,No,No,English,M2K
+ER-1139,2025-11-28,2025-11-28 08:20,2025-11-29 19:47,Ambulance,1,Stroke symptoms,60,F,265,35.4,Neuro,Admitted,Yes,No,English,M4W
+ER-1140,2025-11-29,2025-11-29 10:28,2025-11-29 16:08,Walk-in,4,Medication refill,55,M,210,5.6,Minor injury,Observation,No,Yes,,M2K
+ER-1141,2025-11-22,2025-11-22 23:35,2025-11-23 00:38,Referral,5,Laceration,41,M,158,1.0,Minor injury,Discharged,No,No,English,M2K
+ER-1142,2026-02-11,2026-02-11 05:09,2026-02-11 08:06,Walk-in,5,Fever,49,M,253,2.9,Infection,Discharged,No,No,English,L4N
+ER-1143,2026-02-07,2026-02-07 06:38,2026-02-07 09:57,,5,Ankle injury,73,F,98,3.3,Orthopedic,Discharged,No,No,English,L6A
+ER-1144,2026-01-12,2026-01-12 09:48,2026-01-12 13:33,Walk-in,5,Mental health crisis,65,M,322,3.8,Mental Health,Discharged,No,Yes,French,L4G
+ER-1145,2025-11-03,2025-11-03 23:49,2025-11-04 03:34,Walk-in,4,Back pain,72,M,140,3.7,Orthopedic,Discharged,No,No,English,L6A
+ER-1146,2026-01-18,2026-01-18 20:28,2026-01-19 02:39,Ambulance,3,Ankle injury,8,M,73,6.2,Orthopedic,Discharged,No,No,Tagalog,M4W
+ER-1147,2025-11-14,2025-11-14 00:49,2025-11-14 07:49,,3,Back pain,64,F,106,7.0,Orthopedic,Admitted,Yes,No,French,L4P
+ER-1148,2025-11-22,2025-11-22 05:36,2025-11-22 09:04,Ambulance,3,Difficulty breathing,55,F,73,3.5,Respiratory,Observation,No,No,Punjabi,L6A
+ER-1149,2025-11-10,2025-11-10 19:43,2025-11-11 07:11,Walk-in,3,Abdominal pain,94,M,80,11.5,GI,Admitted,Yes,No,English,L4S
+ER-1150,2025-12-21,2025-12-21 01:23,2025-12-21 06:01,Walk-in,3,Difficulty breathing,41,F,79,4.7,Respiratory,Discharged,No,No,English,M2K
+ER-1151,2026-01-09,2026-01-09 20:32,2026-01-09 23:01,Walk-in,5,Sepsis concern,28,F,308,2.4,Infection,Discharged,No,No,Punjabi,L4S
+ER-1152,2025-12-24,2025-12-24 06:45,2025-12-24 15:35,Referral,4,Difficulty breathing,64,F,121,8.9,Respiratory,Discharged,No,No,Spanish,L6A
+ER-1153,2025-12-26,2025-12-26 22:01,2025-12-26 23:50,Walk-in,5,Back pain,43,M,104,1.9,Orthopedic,Discharged,No,No,English,L4G
+ER-1154,2026-03-01,2026-03-01 07:02,2026-03-01 11:19,Walk-in,4,Headache,96,F,118,4.2,Neuro,Observation,No,No,French,L3R
+ER-1155,2025-12-01,2025-12-01 10:25,2025-12-01 13:44,Walk-in,5,Difficulty breathing,49,M,225,3.3,Respiratory,Observation,No,No,,M2K
+ER-1156,2026-02-14,2026-02-14 15:53,2026-02-14 18:16,Walk-in,4,Difficulty breathing,43,M,637,2.4,Respiratory,Discharged,No,No,English,L4G
+ER-1157,2025-12-30,2025-12-30 03:01,2025-12-30 07:10,Walk-in,4,Headache,47,F,166,4.1,Neuro,Discharged,No,No,Punjabi,L4S
+ER-1158,2025-12-05,2025-12-05 13:22,2025-12-05 16:27,Walk-in,5,Fever,72,M,832,3.1,Infection,Discharged,No,No,English,L4N
+ER-1159,2026-01-06,2026-01-06 12:07,2026-01-07 00:03,Ambulance,2,Medication refill,97,M,31,12.0,Minor injury,Discharged,No,No,English,L4P
+ER-1160,2026-02-06,2026-02-06 18:48,2026-02-06 23:45,Walk-in,5,Chest pain,50,M,377,4.9,Cardiac,Discharged,No,Yes,English,L4N
+ER-1161,2026-01-08,2026-01-08 23:54,2026-01-09 04:20,Walk-in,5,Difficulty breathing,33,M,406,4.5,Respiratory,Discharged,No,No,English,L6A
+ER-1162,2026-01-14,2026-01-14 15:56,2026-01-14 18:09,Walk-in,4,Headache,21,M,194,2.2,Neuro,Discharged,No,No,English,M4W
+ER-1163,2025-12-29,2025-12-29 09:49,2025-12-29 15:06,Walk-in,4,Shortness of breath,13,F,502,5.2,Respiratory,,No,No,Mandarin,L3R
+ER-1164,2026-02-02,2026-02-02 09:45,2026-02-02 10:50,Walk-in,5,Fever,48,M,341,1.0,Infection,Discharged,No,No,Punjabi,L4P
+ER-1165,2026-01-06,2026-01-06 10:01,2026-01-06 23:29,Walk-in,2,Stroke symptoms,97,F,39,13.5,Neuro,Admitted,Yes,No,Tagalog,M4W
+ER-1166,2025-12-19,2025-12-19 19:32,2025-12-19 23:41,Ambulance,3,Fall,0,M,101,4.1,Orthopedic,,No,Yes,Punjabi,M4W
+ER-1167,2025-11-13,2025-11-13 07:42,2025-11-13 10:49,Walk-in,4,Fall,38,M,175,3.1,Orthopedic,Discharged,No,Yes,English,M2K
+ER-1168,2026-01-28,2026-01-28 04:00,2026-01-29 11:12,Referral,1,Stroke symptoms,23,F,11,31.2,Neuro,Admitted,Yes,No,English,L4S
+ER-1169,2026-02-13,2026-02-13 08:01,2026-02-13 12:21,Walk-in,5,Chest pain,23,F,129,4.4,Cardiac,Discharged,No,No,French,L6A
+ER-1170,2025-12-29,2025-12-29 00:32,2025-12-29 04:37,Walk-in,4,Medication refill,72,F,152,4.1,Minor injury,Discharged,No,No,English,L6A
+ER-1171,2026-02-19,2026-02-19 02:32,2026-02-19 17:40,Ambulance,2,Back pain,0,F,12,15.1,Orthopedic,Admitted,Yes,No,French,M2K
+ER-1172,2026-01-26,2026-01-26 02:09,2026-01-26 03:08,Walk-in,5,Back pain,49,M,727,0.9,Orthopedic,Discharged,No,No,English,L6A
+ER-1173,2025-12-01,2025-12-01 18:31,2025-12-01 21:38,Walk-in,5,Dizziness,3,F,130,3.2,Neuro,Discharged,No,No,English,L4G
+ER-1174,2025-12-14,2025-12-14 17:20,2025-12-14 22:46,Walk-in,5,Chest pain,60,M,239,5.4,Cardiac,Discharged,No,No,Punjabi,L4S
+ER-1175,2026-02-23,2026-02-23 16:43,2026-02-23 19:11,Walk-in,5,Back pain,44,F,170,2.4,Orthopedic,Discharged,No,No,Mandarin,L4P
+ER-1176,2026-01-04,2026-01-04 11:05,2026-01-04 20:22,Walk-in,2,Difficulty breathing,22,M,43,9.2,Respiratory,Discharged,No,No,Tagalog,L6A
+ER-1177,2026-01-17,2026-01-17 17:12,2026-01-17 23:47,Referral,3,Ankle injury,97,F,42,6.6,Orthopedic,Observation,No,No,Arabic,L4P
+ER-1178,2026-01-30,2026-01-30 03:52,2026-01-30 09:48,Walk-in,4,Shortness of breath,32,M,127,6.0,Respiratory,Discharged,No,No,Tagalog,M4W
+ER-1179,2025-11-08,2025-11-08 21:36,2025-11-09 01:51,Walk-in,5,Shortness of breath,40,F,221,4.3,Respiratory,Discharged,No,No,French,M2K
+ER-1180,2026-02-09,2026-02-09 12:01,2026-02-10 23:11,Referral,1,Stroke symptoms,34,F,5,35.1,Neuro,Admitted,Yes,No,English,M2K
+ER-1181,2025-11-23,2025-11-23 22:30,2025-11-24 02:04,Referral,3,Abdominal pain,58,F,79,3.5,GI,Discharged,No,No,English,L3R
+ER-1182,2026-01-02,2026-01-02 03:39,2026-01-03 05:11,Ambulance,1,Sepsis concern,70,M,9,25.5,Infection,Admitted,Yes,Yes,English,M4W
+ER-1183,2025-12-31,2025-12-31 11:56,2025-12-31 21:10,Referral,3,Fever,36,M,104,9.3,Infection,Admitted,Yes,No,English,L4S
+ER-1184,2026-02-23,2026-02-23 16:42,2026-02-24 22:20,Walk-in,1,Stroke symptoms,60,M,3,29.7,Neuro,Admitted,Yes,No,French,M2K
+ER-1185,2026-01-22,2026-01-22 11:53,2026-01-22 22:23,Ambulance,3,Abdominal pain,60,F,36,10.5,GI,,Yes,No,English,M2K
+ER-1186,2025-11-09,2025-11-09 10:42,2025-11-09 16:07,Ambulance,3,Chest pain,66,F,89,5.4,Cardiac,Discharged,No,Yes,Mandarin,L3R
+ER-1187,2026-01-21,2026-01-21 03:59,2026-01-21 05:12,Walk-in,5,Sepsis concern,92,F,423,1.3,Infection,Discharged,No,Yes,English,L4P
+ER-1188,2026-01-25,2026-01-25 09:08,2026-01-25 16:46,Ambulance,3,Chest pain,49,M,95,7.6,Cardiac,Discharged,No,Yes,English,L3R
+ER-1189,2026-01-24,2026-01-24 05:43,2026-01-24 09:19,Walk-in,4,Back pain,32,F,46,3.6,Orthopedic,Discharged,No,No,English,L4P
+ER-1190,2026-01-17,2026-01-17 07:14,2026-01-17 08:03,Walk-in,5,Fall,61,F,345,0.9,Orthopedic,Discharged,No,No,Spanish,L4G
+ER-1191,2026-01-23,2026-01-23 16:24,2026-01-24 11:44,Ambulance,2,Sepsis concern,69,M,16,19.4,Infection,Admitted,Yes,No,English,M2K
+ER-1192,2025-11-19,2025-11-19 15:07,2025-11-20 00:54,Ambulance,3,Difficulty breathing,26,F,122,9.8,Respiratory,Admitted,Yes,No,English,M2K
+ER-1193,2025-12-06,2025-12-06 14:34,2025-12-07 05:06,Ambulance,2,Fall,25,F,45,14.5,Orthopedic,Discharged,No,No,Spanish,M4W
+ER-1194,2025-11-10,2025-11-10 08:41,2025-11-10 12:39,,3,Fall,36,F,71,3.9,Orthopedic,Discharged,No,No,English,L4S
+ER-1195,2025-11-21,2025-11-21 23:01,2025-11-22 02:18,Walk-in,5,Chest pain,54,M,334,3.3,Cardiac,Discharged,No,Yes,Punjabi,L4N
+ER-1196,2026-02-07,2026-02-07 02:06,2026-02-07 10:34,Walk-in,3,Fall,57,M,83,8.5,Orthopedic,Admitted,Yes,No,English,L4G
+ER-1197,2026-02-09,2026-02-09 08:13,2026-02-09 16:54,Walk-in,3,Headache,19,M,25,8.6,Neuro,Discharged,No,No,English,L4G
+ER-1198,2026-02-16,2026-02-16 02:49,2026-02-16 17:43,Ambulance,2,Headache,4,F,22,14.9,Neuro,Admitted,Yes,No,English,L4N
+ER-1199,2025-12-17,2025-12-17 08:08,2025-12-17 14:00,Walk-in,4,Laceration,44,F,138,5.9,Minor injury,Discharged,No,No,English,L3R
+ER-1200,2026-02-19,2026-02-19 23:05,2026-02-20 00:58,Walk-in,4,Ankle injury,91,M,86,1.9,Orthopedic,Observation,No,No,French,L4G
+ER-1201,2025-11-29,2025-11-29 08:47,2025-11-29 15:24,Walk-in,4,Chest pain,67,M,118,6.7,Cardiac,Left Without Being Seen,No,No,French,L3R
+ER-1202,2026-01-26,2026-01-26 21:48,2026-01-27 00:34,Walk-in,4,Ankle injury,36,M,67,2.8,Orthopedic,Discharged,No,No,French,L4G
+ER-1203,2025-12-06,2025-12-06 11:52,2025-12-07 01:46,Walk-in,4,Mental health crisis,44,F,174,13.9,Mental Health,Admitted,Yes,No,Tagalog,L4N
+ER-1204,2025-12-29,2025-12-29 16:47,2025-12-29 21:58,Ambulance,2,Fever,47,F,32,5.1,Infection,Discharged,No,No,English,L4P
+ER-1205,2026-02-28,2026-02-28 10:58,2026-03-01 04:07,Walk-in,2,Stroke symptoms,51,F,20,17.1,Neuro,Admitted,Yes,No,Spanish,M2K
+ER-1206,2025-11-01,2025-11-01 06:22,2025-11-01 13:07,Ambulance,3,Chest pain,75,F,65,6.7,Cardiac,Observation,No,No,English,L4N
+ER-1207,2026-02-08,2026-02-08 18:20,2026-02-08 21:26,Walk-in,4,Headache,11,F,98,3.1,Neuro,Discharged,No,No,English,L4N
+ER-1208,2026-02-18,2026-02-18 23:15,2026-02-19 06:29,Walk-in,3,Dizziness,54,F,98,7.3,Neuro,Discharged,No,No,English,M4W
+ER-1209,2026-01-20,2026-01-20 06:19,2026-01-20 19:00,,2,Stroke symptoms,36,M,33,12.7,Neuro,Admitted,Yes,No,English,L4S
+ER-1210,2026-01-17,2026-01-17 18:41,2026-01-17 23:52,Walk-in,5,Shortness of breath,74,F,236,5.1,Respiratory,Discharged,No,No,English,L4N
+ER-1211,2025-11-11,2025-11-11 06:16,2025-11-11 08:53,Walk-in,3,Ankle injury,25,M,75,2.7,Orthopedic,Observation,No,No,French,L3R
+ER-1212,2025-11-22,2025-11-22 17:12,2025-11-23 07:04,Walk-in,2,Headache,16,M,420,13.8,Neuro,Admitted,Yes,No,English,L4N
+ER-1213,2025-11-22,2025-11-22 18:56,2025-11-22 21:28,Walk-in,5,Sepsis concern,34,M,346,2.5,Infection,Discharged,No,No,English,L3R
+ER-1214,2026-02-12,2026-02-12 10:47,2026-02-12 13:33,Walk-in,4,Rash,69,F,435,2.8,Infection,Observation,No,No,English,L4G
+ER-1215,2026-01-10,2026-01-10 17:41,2026-01-10 20:50,Walk-in,5,Laceration,29,M,400,3.1,Minor injury,Discharged,No,No,English,L4N
+ER-1216,2026-01-19,2026-01-19 06:32,2026-01-19 16:48,Walk-in,3,Difficulty breathing,52,F,31,10.2,Respiratory,Admitted,Yes,No,English,L6A
+ER-1217,2026-02-10,2026-02-10 01:54,2026-02-10 03:49,Walk-in,5,Abdominal pain,53,M,106,2.0,GI,Observation,No,No,English,L4G
+ER-1218,2026-02-07,2026-02-07 02:18,2026-02-07 08:50,Walk-in,4,Mental health crisis,43,M,124,6.6,Mental Health,Discharged,No,No,English,L4S
+ER-1219,2025-11-22,2025-11-22 10:43,2025-11-23 01:03,Ambulance,2,Headache,48,M,38,14.3,Neuro,Admitted,Yes,No,English,L3R
+ER-1220,2025-11-17,2025-11-17 21:39,2025-11-18 11:38,Walk-in,2,Stroke symptoms,97,M,36,13.9,Neuro,Admitted,Yes,No,Punjabi,L4N
+ER-1221,2025-12-06,2025-12-06 03:03,2025-12-07 14:04,Ambulance,1,Shortness of breath,56,F,6,35.1,Respiratory,Admitted,Yes,No,Punjabi,L4G
+ER-1222,2025-11-20,2025-11-20 10:56,2025-11-20 21:16,Walk-in,2,Stroke symptoms,61,M,15,10.3,Neuro,Discharged,No,No,English,L4G
+ER-1223,2025-12-03,2025-12-03 16:53,2025-12-03 21:07,Walk-in,4,Ankle injury,93,F,170,4.3,Orthopedic,Discharged,No,No,English,M4W
+ER-1224,2025-11-28,2025-11-28 04:51,2025-11-28 11:05,Referral,3,Headache,68,F,74,6.2,Neuro,Discharged,No,No,English,M4W
+ER-1225,2026-01-10,2026-01-10 17:19,2026-01-11 15:32,Walk-in,1,Stroke symptoms,15,M,6,22.2,Neuro,Observation,No,No,French,L4P
+ER-1226,2025-12-21,2025-12-21 07:20,2025-12-21 11:45,Walk-in,5,Chest pain,39,M,335,4.5,Cardiac,Discharged,No,No,English,L4P
+ER-1227,2025-12-16,2025-12-16 19:24,2025-12-16 23:32,Walk-in,4,Fall,31,M,68,4.1,Orthopedic,Discharged,No,Yes,English,L3R
+ER-1228,2026-01-13,2026-01-13 13:54,2026-01-13 17:52,Walk-in,5,Chest pain,37,F,292,3.9,Cardiac,Observation,No,No,French,L4G
+ER-1229,2026-01-26,2026-01-26 13:07,2026-01-26 18:17,Ambulance,3,Medication refill,46,F,80,5.1,Minor injury,Discharged,No,Yes,English,L4G
+ER-1230,2025-12-21,2025-12-21 04:14,2025-12-21 16:33,Walk-in,4,Mental health crisis,15,X,179,12.4,Mental Health,Admitted,Yes,No,English,L4S
+ER-1231,2026-02-11,2026-02-11 11:07,2026-02-11 15:40,Walk-in,4,Back pain,60,M,84,4.6,Orthopedic,,No,Yes,Tagalog,L6A
+ER-1232,2026-01-08,2026-01-08 20:33,2026-01-09 00:48,Walk-in,4,Fall,38,M,81,4.3,Orthopedic,,No,No,English,L4N
+ER-1233,2025-12-05,2025-12-05 00:28,2025-12-05 01:21,Walk-in,5,Sepsis concern,91,M,188,0.9,Infection,Discharged,No,No,English,L4S
+ER-1234,2025-12-21,2025-12-21 18:12,2025-12-22 08:08,Ambulance,2,Fever,51,F,27,14.0,Infection,Discharged,No,No,French,M4W
+ER-1235,2025-11-12,2025-11-12 11:49,2025-11-13 06:17,Ambulance,2,Ankle injury,24,F,29,18.4,Orthopedic,Admitted,Yes,No,French,M2K
+ER-1236,2026-02-26,2026-02-26 17:16,2026-02-26 22:31,Walk-in,4,Abdominal pain,35,M,75,5.2,GI,Discharged,No,Yes,English,M4W
+ER-1237,2025-11-17,2025-11-17 15:55,2025-11-17 18:10,Walk-in,4,Fall,22,F,51,2.2,Orthopedic,Discharged,No,No,French,L4P
+ER-1238,2025-12-23,2025-12-23 10:22,2025-12-23 18:25,Walk-in,4,Mental health crisis,25,F,157,8.1,Mental Health,Discharged,No,No,English,M4W
+ER-1239,2026-01-30,2026-01-30 07:24,2026-01-30 17:07,Ambulance,2,Headache,49,X,41,9.8,Neuro,Discharged,No,No,Mandarin,L4G
+ER-1240,2026-01-28,2026-01-28 15:03,2026-01-28 18:38,Walk-in,4,Back pain,40,M,68,3.5,Orthopedic,Observation,No,No,Punjabi,L6A
+ER-1241,2025-12-12,2025-12-12 03:21,2025-12-12 13:19,Ambulance,3,Shortness of breath,54,F,71,10.0,Respiratory,Discharged,No,No,French,L6A
+ER-1242,2026-01-31,2026-01-31 14:01,2026-01-31 21:33,Walk-in,3,Rash,53,M,82,7.5,Infection,Admitted,Yes,No,,L4G
+ER-1243,2025-12-31,2025-12-31 02:16,2026-01-01 02:09,Walk-in,2,Dizziness,32,M,43,23.8,Neuro,Admitted,Yes,No,English,L4P
+ER-1244,2026-01-26,2026-01-26 15:35,2026-01-26 19:42,Walk-in,5,Shortness of breath,35,M,254,4.2,Respiratory,Discharged,No,No,English,L4S
+ER-1245,2025-11-27,2025-11-27 15:05,2025-11-27 20:42,Walk-in,4,Headache,73,F,230,5.7,Neuro,Left Without Being Seen,No,No,French,L4P
+ER-1246,2026-02-12,2026-02-12 02:01,2026-02-12 06:20,Walk-in,4,Ankle injury,42,M,45,4.4,Orthopedic,Observation,No,No,English,M4W
+ER-1247,2025-12-10,2025-12-10 18:10,2025-12-12 01:48,Walk-in,1,Stroke symptoms,61,F,10,31.7,Neuro,Admitted,Yes,No,English,L4P
+ER-1248,2025-12-30,2025-12-30 09:58,2025-12-30 14:41,Ambulance,3,Laceration,59,F,91,4.8,Minor injury,Discharged,No,No,English,L4P
+ER-1249,2026-02-16,2026-02-16 18:53,2026-02-17 04:27,Walk-in,3,Medication refill,75,F,134,9.5,Minor injury,Admitted,Yes,No,English,M2K
+ER-1250,2026-01-04,2026-01-04 00:59,2026-01-04 05:36,Walk-in,5,Difficulty breathing,72,F,244,4.6,Respiratory,Discharged,No,No,,L4S
+ER-1251,2026-02-28,2026-02-28 04:18,2026-02-28 11:53,Walk-in,3,Abdominal pain,54,M,120,7.5,GI,Discharged,No,No,English,M2K
+ER-1252,2026-01-11,2026-01-11 11:51,2026-01-11 19:06,Walk-in,4,Mental health crisis,39,M,114,7.2,Mental Health,Discharged,No,No,English,L4P
+ER-1253,2026-02-23,2026-02-23 04:31,2026-02-23 13:42,Walk-in,4,Dizziness,29,M,216,9.1,Neuro,Admitted,Yes,No,Mandarin,L6A
+ER-1254,2025-11-19,2025-11-19 07:55,2025-11-19 13:22,Ambulance,3,Fall,85,F,114,5.5,Orthopedic,Observation,No,No,English,L4S
+ER-1255,2026-02-13,2026-02-13 15:51,2026-02-14 06:01,Ambulance,2,Headache,21,M,33,14.2,Neuro,Admitted,Yes,No,English,L3R
+ER-1256,2026-01-24,2026-01-24 03:28,2026-01-24 12:02,Walk-in,3,Difficulty breathing,13,M,66,8.5,Respiratory,Discharged,No,No,English,L4S
+ER-1257,2026-02-05,2026-02-05 16:15,2026-02-05 21:48,Walk-in,4,Fever,32,F,202,5.6,Infection,Discharged,No,No,English,L4N
+ER-1258,2026-02-17,2026-02-17 02:28,2026-02-17 13:53,Walk-in,2,Rash,24,M,334,11.5,Infection,Discharged,No,No,Arabic,M2K
+ER-1259,2025-11-18,2025-11-18 04:12,2025-11-18 16:08,Walk-in,5,Medication refill,30,F,413,11.9,Minor injury,Admitted,Yes,No,English,L3R
+ER-1260,2026-01-19,2026-01-19 14:06,2026-01-19 20:03,Walk-in,4,Laceration,64,F,135,5.9,Minor injury,Discharged,No,No,Punjabi,L4N
+ER-1261,2026-01-28,2026-01-28 19:02,2026-01-28 20:37,Walk-in,4,Fall,88,F,165,1.5,Orthopedic,Discharged,No,No,English,L4N
+ER-1262,2025-12-16,2025-12-16 04:05,2025-12-16 08:34,Referral,3,Rash,68,F,101,4.4,Infection,Discharged,No,Yes,English,L6A
+ER-1263,2026-02-09,2026-02-09 07:11,2026-02-09 11:01,Walk-in,4,Back pain,43,M,199,3.9,Orthopedic,Discharged,No,No,Mandarin,L4N
+ER-1264,2026-02-14,2026-02-14 22:12,2026-02-15 01:57,Walk-in,4,Difficulty breathing,63,F,143,3.7,Respiratory,Discharged,No,No,Punjabi,L4P
+ER-1265,2025-11-30,2025-11-30 23:45,2025-12-01 05:13,Walk-in,4,Medication refill,74,F,249,5.4,Minor injury,Left Without Being Seen,No,No,English,L4P
+ER-1266,2025-12-21,2025-12-21 13:56,2025-12-21 15:58,Walk-in,4,Ankle injury,82,M,94,2.0,Orthopedic,Left Without Being Seen,No,No,English,L4G
+ER-1267,2025-11-04,2025-11-04 10:43,2025-11-04 16:29,Walk-in,5,Chest pain,21,M,396,5.7,Cardiac,Discharged,No,No,English,L6A
+ER-1268,2026-02-24,2026-02-24 08:19,2026-02-24 23:11,Walk-in,2,Stroke symptoms,9,F,12,14.8,Neuro,Admitted,Yes,No,,L4N
+ER-1269,2026-02-07,2026-02-07 14:41,2026-02-07 17:52,Walk-in,5,Headache,43,F,362,3.2,Neuro,Discharged,No,No,French,L4G
+ER-1270,2026-01-02,2026-01-02 14:10,2026-01-02 18:11,Walk-in,5,Medication refill,35,M,105,4.1,Minor injury,Admitted,Yes,No,Mandarin,L3R
+ER-1271,2026-02-18,2026-02-18 07:04,2026-02-18 07:58,,5,Abdominal pain,47,F,631,0.9,GI,Discharged,No,No,English,L4P
+ER-1272,2025-12-20,2025-12-20 00:32,2025-12-20 04:23,Walk-in,4,Rash,27,M,252,3.9,Infection,Discharged,No,Yes,Mandarin,L4G
+ER-1273,2025-11-30,2025-11-30 03:38,2025-11-30 10:46,Referral,4,Chest pain,41,M,562,7.2,Cardiac,Discharged,No,No,Spanish,L4S
+ER-1274,2025-12-25,2025-12-25 23:00,2025-12-26 02:20,Walk-in,3,Medication refill,46,M,98,3.4,Minor injury,Left Without Being Seen,No,No,English,L6A
+ER-1275,2025-11-06,2025-11-06 10:02,2025-11-06 13:58,Walk-in,4,Medication refill,72,F,90,3.9,Minor injury,Discharged,No,No,Punjabi,L3R
+ER-1276,2025-11-24,2025-11-24 11:34,2025-11-25 03:28,Ambulance,2,Abdominal pain,48,M,30,15.9,GI,Discharged,No,No,,L4P
+ER-1277,2025-11-20,2025-11-20 11:12,2025-11-21 07:06,Ambulance,2,Difficulty breathing,73,F,31,19.9,Respiratory,Admitted,Yes,No,Mandarin,L3R
+ER-1278,2025-12-12,2025-12-12 18:47,2025-12-13 13:08,Walk-in,1,Stroke symptoms,89,M,6,18.3,Neuro,Admitted,Yes,No,English,M2K
+ER-1279,2025-11-25,2025-11-25 01:33,2025-11-25 08:10,Walk-in,3,Fall,70,F,42,6.6,Orthopedic,Discharged,No,No,English,L4N
+ER-1280,2026-02-18,2026-02-18 01:59,2026-02-18 06:24,Walk-in,4,Mental health crisis,71,M,405,4.4,Mental Health,Discharged,No,No,English,L6A
+ER-1281,2026-02-12,2026-02-12 06:37,2026-02-13 01:32,Ambulance,2,Headache,47,F,34,19.0,Neuro,Admitted,Yes,No,French,L4S
+ER-1282,2026-01-30,2026-01-30 11:40,2026-01-30 19:38,Walk-in,4,Sepsis concern,75,M,45,7.9,Infection,Admitted,Yes,No,English,L4G
+ER-1283,2026-02-28,2026-02-28 16:06,2026-02-28 19:23,Walk-in,5,Sepsis concern,62,M,257,3.3,Infection,Discharged,No,No,Mandarin,L6A
+ER-1284,2026-02-04,2026-02-04 11:46,2026-02-05 11:00,Ambulance,2,Stroke symptoms,60,M,40,23.3,Neuro,Admitted,Yes,Yes,English,L3R
+ER-1285,2026-01-28,2026-01-28 10:35,2026-01-28 17:50,Ambulance,2,Abdominal pain,53,F,19,7.2,GI,Discharged,No,No,Punjabi,L3R
+ER-1286,2025-12-24,2025-12-24 22:30,2025-12-25 04:27,Walk-in,3,Fever,39,F,136,5.9,Infection,Discharged,No,No,English,L4P
+ER-1287,2026-02-10,2026-02-10 03:51,2026-02-10 06:34,Walk-in,4,Difficulty breathing,35,F,117,2.8,Respiratory,Left Without Being Seen,No,No,English,L6A
+ER-1288,2025-11-24,2025-11-24 13:43,2025-11-24 22:46,Walk-in,4,Chest pain,89,M,82,9.1,Cardiac,Discharged,No,No,Tagalog,M4W
+ER-1289,2025-12-08,2025-12-08 13:00,2025-12-08 16:01,Walk-in,5,Rash,47,M,359,3.1,Infection,Discharged,No,No,English,L4G
+ER-1290,2026-01-22,2026-01-22 11:21,2026-01-22 14:36,Walk-in,5,Ankle injury,0,M,487,3.3,Orthopedic,Discharged,No,No,,M4W
+ER-1291,2025-12-18,2025-12-18 19:22,2025-12-19 00:36,Walk-in,3,Fever,8,M,36,5.3,Infection,Observation,No,No,English,L6A
+ER-1292,2025-12-31,2025-12-31 06:24,2026-01-01 04:38,Referral,1,Stroke symptoms,96,M,10,22.2,Neuro,Admitted,Yes,No,Tagalog,M4W
+ER-1293,2025-12-09,2025-12-09 22:53,2025-12-10 09:17,Ambulance,2,Rash,44,M,17,10.4,Infection,Observation,No,No,French,L4N
+ER-1294,2026-02-04,2026-02-04 07:57,2026-02-04 11:50,Walk-in,4,Difficulty breathing,29,M,205,3.8,Respiratory,Observation,No,No,Punjabi,L4G
+ER-1295,2026-02-25,2026-02-25 13:04,2026-02-25 18:19,Referral,3,Chest pain,0,M,123,5.2,Cardiac,Discharged,No,No,,L4P
+ER-1296,2026-01-06,2026-01-06 12:29,2026-01-06 16:06,Walk-in,4,Difficulty breathing,36,M,86,3.6,Respiratory,Discharged,No,No,Spanish,L4S
+ER-1297,2026-01-16,2026-01-16 20:23,2026-01-17 17:11,Walk-in,1,Stroke symptoms,44,M,4,20.8,Neuro,Admitted,Yes,No,English,M2K
+ER-1298,2026-02-10,2026-02-10 10:32,2026-02-10 14:51,Walk-in,4,Chest pain,40,M,56,4.4,Cardiac,Observation,No,No,Tagalog,M2K
+ER-1299,2026-02-18,2026-02-18 06:49,2026-02-18 10:20,Walk-in,4,Ankle injury,84,M,180,3.6,Orthopedic,Discharged,No,No,English,L4S
+ER-1300,2026-02-15,2026-02-15 00:31,2026-02-15 03:32,Walk-in,4,Medication refill,63,M,149,3.0,Minor injury,Discharged,No,No,English,L4P
+ER-1301,2026-02-16,2026-02-16 08:43,2026-02-16 15:32,Walk-in,3,Laceration,55,F,132,6.9,Minor injury,Discharged,No,Yes,French,L4S
+ER-1302,2026-02-23,2026-02-23 19:49,2026-02-24 00:38,Referral,4,Abdominal pain,34,F,96,4.9,GI,Discharged,No,No,Punjabi,L4N
+ER-1303,2025-12-22,2025-12-22 00:14,2025-12-22 08:17,Referral,3,Fall,34,F,54,8.1,Orthopedic,Admitted,Yes,Yes,English,L4S
+ER-1304,2026-01-06,2026-01-06 21:30,2026-01-07 07:28,Ambulance,2,Dizziness,49,M,39,9.9,Neuro,Admitted,Yes,No,English,L4G
+ER-1305,2026-01-11,2026-01-11 13:01,2026-01-11 15:07,Walk-in,5,Rash,58,F,269,2.1,Infection,Discharged,No,No,Punjabi,L3R
+ER-1306,2025-12-07,2025-12-07 03:21,2025-12-07 05:11,Walk-in,4,Fever,66,F,138,1.8,Infection,Discharged,No,No,English,L4S
+ER-1307,2026-01-28,2026-01-28 07:15,2026-01-28 12:14,Walk-in,3,Rash,59,F,109,5.0,Infection,Observation,No,No,Punjabi,L4G
+ER-1308,2026-01-04,2026-01-04 13:17,2026-01-05 21:13,Ambulance,1,Stroke symptoms,71,M,6,32.0,Neuro,Admitted,Yes,No,,L4S
+ER-1309,2026-02-17,2026-02-17 07:34,2026-02-18 00:09,Walk-in,2,Stroke symptoms,83,F,21,16.6,Neuro,Admitted,Yes,No,,L4N
+ER-1310,2026-01-30,2026-01-30 02:36,2026-01-30 06:08,Walk-in,4,Shortness of breath,62,F,255,3.6,Respiratory,Left Without Being Seen,No,No,French,M4W
+ER-1311,2025-12-23,2025-12-23 15:59,2025-12-23 22:02,Walk-in,4,Abdominal pain,56,F,86,6.0,GI,Discharged,No,No,English,M2K
+ER-1312,2025-11-04,2025-11-04 16:08,2025-11-04 19:11,Walk-in,4,Fall,31,F,55,3.1,Orthopedic,Discharged,No,No,English,L4N
+ER-1313,2025-11-18,2025-11-18 02:51,2025-11-18 05:20,Walk-in,4,Headache,72,M,109,2.5,Neuro,Discharged,No,No,English,M4W
+ER-1314,2026-02-19,2026-02-19 06:44,2026-02-19 10:43,Walk-in,4,Difficulty breathing,0,M,73,3.9,Respiratory,Discharged,No,No,Spanish,L6A
+ER-1315,2026-01-28,2026-01-28 05:51,2026-01-28 23:52,Referral,3,Ankle injury,21,M,140,18.0,Orthopedic,Admitted,Yes,No,Arabic,M4W
+ER-1316,2025-11-21,2025-11-21 15:49,2025-11-22 06:25,Referral,2,Stroke symptoms,67,M,25,14.6,Neuro,Left Without Being Seen,No,No,English,L4P
+ER-1317,2026-02-13,2026-02-13 17:31,2026-02-13 23:43,Walk-in,2,Stroke symptoms,32,M,19,6.2,Neuro,Discharged,No,No,French,L4P
+ER-1318,2025-12-23,2025-12-23 17:26,2025-12-24 02:47,,2,Stroke symptoms,9,F,16,9.3,Neuro,,No,No,English,M4W
+ER-1319,2026-01-18,2026-01-18 22:31,2026-01-19 01:28,Walk-in,5,Abdominal pain,57,F,275,3.0,GI,Discharged,No,No,English,L4S
+ER-1320,2026-02-19,2026-02-19 18:26,2026-02-20 10:52,Ambulance,2,Fall,79,M,16,16.4,Orthopedic,Admitted,Yes,No,Arabic,M2K
+ER-1321,2025-12-29,2025-12-29 07:41,2025-12-29 19:33,Walk-in,3,Difficulty breathing,30,M,116,11.8,Respiratory,Discharged,No,Yes,English,L4G
+ER-1322,2025-12-03,2025-12-03 02:35,2025-12-03 06:00,Walk-in,3,Medication refill,77,F,72,3.4,Minor injury,Discharged,No,No,English,L3R
+ER-1323,2025-11-17,2025-11-17 14:45,2025-11-17 19:14,Walk-in,4,Fall,62,M,201,4.5,Orthopedic,Discharged,No,No,English,L3R
+ER-1324,2025-11-05,2025-11-05 21:59,2025-11-06 02:13,Walk-in,4,Shortness of breath,37,F,442,4.3,Respiratory,Discharged,No,No,English,L6A
+ER-1325,2026-01-14,2026-01-14 23:24,2026-01-15 04:39,Referral,4,Fever,24,F,241,5.3,Infection,Discharged,No,No,,L4S
+ER-1326,2025-12-29,2025-12-29 05:31,2025-12-29 08:36,Walk-in,4,Fall,35,F,56,3.0,Orthopedic,Discharged,No,No,Punjabi,L6A
+ER-1327,2025-12-22,2025-12-22 05:40,2025-12-22 08:16,Walk-in,5,Ankle injury,52,M,153,2.6,Orthopedic,Discharged,No,No,English,L4N
+ER-1328,2026-01-05,2026-01-05 00:53,2026-01-05 03:21,Walk-in,5,Dizziness,38,F,358,2.5,Neuro,Discharged,No,No,English,M4W
+ER-1329,2026-01-22,2026-01-22 03:23,2026-01-22 06:46,Walk-in,4,Rash,82,F,77,3.4,Infection,Discharged,No,No,English,L4S
+ER-1330,2026-01-14,2026-01-14 13:18,2026-01-14 20:13,Walk-in,3,Fever,65,M,47,6.9,Infection,Discharged,No,No,Punjabi,L4P
+ER-1331,2025-11-24,2025-11-24 13:07,2025-11-24 16:31,Walk-in,5,Fall,68,F,476,3.4,Orthopedic,Discharged,No,No,,L3R
+ER-1332,2025-11-18,2025-11-18 08:54,2025-11-18 10:02,Walk-in,5,Headache,63,M,166,1.1,Neuro,Discharged,No,No,English,M2K
+ER-1333,2026-01-02,2026-01-02 07:26,2026-01-02 10:11,Walk-in,4,Dizziness,54,M,58,2.8,Neuro,Observation,No,No,English,L3R
+ER-1334,2026-01-26,2026-01-26 19:54,2026-01-27 03:38,Referral,3,Difficulty breathing,74,F,27,7.7,Respiratory,Discharged,No,No,English,L3R
+ER-1335,2026-01-04,2026-01-04 11:02,2026-01-04 19:07,Walk-in,2,Stroke symptoms,59,M,34,8.1,Neuro,Discharged,No,No,Mandarin,L6A
+ER-1336,2025-12-24,2025-12-24 19:23,2025-12-25 00:40,Referral,3,Difficulty breathing,60,F,31,5.2,Respiratory,Discharged,No,No,English,L4G
+ER-1337,2026-02-07,2026-02-07 23:07,2026-02-08 05:33,Ambulance,3,Fall,74,M,38,6.5,Orthopedic,Discharged,No,No,Arabic,L4S
+ER-1338,2025-11-16,2025-11-16 07:36,2025-11-17 08:20,Ambulance,1,Sepsis concern,8,F,8,24.8,Infection,Admitted,Yes,No,English,L4P
+ER-1339,2026-01-04,2026-01-04 04:51,2026-01-04 09:27,Walk-in,4,Fall,46,M,83,4.6,Orthopedic,Observation,No,No,English,M4W
+ER-1340,2026-01-06,2026-01-06 22:52,2026-01-07 11:40,Referral,3,Abdominal pain,24,F,123,12.8,GI,Admitted,Yes,No,French,L6A
+ER-1341,2026-01-10,2026-01-10 15:14,2026-01-11 10:28,Ambulance,2,Stroke symptoms,64,M,17,19.2,Neuro,Admitted,Yes,No,English,L3R
+ER-1342,2026-02-03,2026-02-03 06:58,2026-02-03 20:27,Ambulance,2,Rash,46,M,27,13.5,Infection,Discharged,No,Yes,Mandarin,L4N
+ER-1343,2025-12-16,2025-12-16 14:55,2025-12-16 19:42,Walk-in,4,Headache,43,F,105,4.7,Neuro,Discharged,No,No,French,M2K
+ER-1344,2025-12-12,2025-12-12 12:21,2025-12-12 16:45,Walk-in,5,Mental health crisis,44,F,120,4.4,Mental Health,Discharged,No,Yes,English,L6A
+ER-1345,2025-12-25,2025-12-25 21:43,2025-12-26 02:33,Referral,4,Difficulty breathing,34,M,169,4.9,Respiratory,Discharged,No,No,English,M2K
+ER-1346,2025-12-08,2025-12-08 06:08,2025-12-08 10:22,,3,Back pain,52,F,72,4.3,Orthopedic,Observation,No,No,French,L4G
+ER-1347,2025-11-06,2025-11-06 23:47,2025-11-07 04:10,Walk-in,4,Rash,78,F,229,4.3,Infection,Discharged,No,No,Mandarin,L3R
+ER-1348,2025-11-06,2025-11-06 22:27,2025-11-07 02:17,Referral,4,Dizziness,22,M,87,3.9,Neuro,Observation,No,No,English,L4S
+ER-1349,2026-01-04,2026-01-04 04:20,2026-01-04 12:31,Ambulance,3,Headache,0,F,51,8.1,Neuro,Observation,No,No,Mandarin,L4P
+ER-1350,2025-12-03,2025-12-03 03:57,2025-12-03 05:49,Walk-in,4,Headache,34,F,91,1.9,Neuro,Discharged,No,No,English,L4P
+ER-1351,2026-02-24,2026-02-24 12:47,2026-02-25 04:01,Walk-in,3,Mental health crisis,32,M,89,15.3,Mental Health,Admitted,Yes,Yes,English,M4W
+ER-1352,2025-11-17,2025-11-17 01:04,2025-11-17 06:14,Walk-in,4,Laceration,36,M,173,5.2,Minor injury,Discharged,No,No,Mandarin,M4W
+ER-1353,2025-11-08,2025-11-08 07:10,2025-11-08 11:47,Referral,3,Difficulty breathing,45,X,132,4.6,Respiratory,Discharged,No,Yes,Punjabi,L4S
+ER-1354,2025-12-11,2025-12-11 10:26,2025-12-11 23:01,Ambulance,2,Stroke symptoms,80,M,36,12.6,Neuro,Discharged,No,No,,L4P
+ER-1355,2026-02-23,2026-02-23 23:15,2026-02-24 03:30,Ambulance,3,Difficulty breathing,6,M,34,4.2,Respiratory,Observation,No,No,English,M4W
+ER-1356,2025-11-29,2025-11-29 23:49,2025-11-30 05:32,,3,Fall,36,M,49,5.7,Orthopedic,Discharged,No,No,English,L3R
+ER-1357,2025-11-15,2025-11-15 03:38,2025-11-15 20:01,Ambulance,2,Difficulty breathing,59,M,44,16.4,Respiratory,Observation,No,No,Tagalog,M2K
+ER-1358,2026-02-22,2026-02-22 21:24,2026-02-23 02:07,Walk-in,4,Laceration,81,M,58,4.7,Minor injury,Observation,No,No,English,L3R
+ER-1359,2025-12-21,2025-12-21 02:10,2025-12-21 05:33,Walk-in,5,Abdominal pain,70,F,286,3.3,GI,Discharged,No,No,English,L4S
+ER-1360,2025-12-14,2025-12-14 17:57,2025-12-16 07:44,Ambulance,1,Stroke symptoms,0,M,10,37.8,Neuro,Admitted,Yes,No,English,L4S
+ER-1361,2026-01-18,2026-01-18 20:17,2026-01-19 01:31,Walk-in,3,Abdominal pain,53,M,76,5.3,GI,Discharged,No,No,French,L4G
+ER-1362,2026-01-06,2026-01-06 21:22,2026-01-07 04:33,Walk-in,3,Mental health crisis,48,F,116,7.2,Mental Health,Discharged,No,No,French,L4N
+ER-1363,2026-01-23,2026-01-23 05:21,2026-01-23 19:37,Ambulance,2,Rash,33,F,29,14.2,Infection,Discharged,No,No,English,M2K
+ER-1364,2025-12-14,2025-12-14 21:26,2025-12-14 23:35,Walk-in,4,Difficulty breathing,42,X,198,2.2,Respiratory,Discharged,No,No,English,L4P
+ER-1365,2025-12-01,2025-12-01 02:47,2025-12-01 22:10,Walk-in,2,Stroke symptoms,50,X,302,19.3,Neuro,Admitted,Yes,No,English,M2K
+ER-1366,2026-02-17,2026-02-17 12:27,2026-02-17 23:22,Walk-in,3,Shortness of breath,60,F,58,10.9,Respiratory,Admitted,Yes,No,English,L4S
+ER-1367,2026-01-31,2026-01-31 11:16,2026-01-31 13:47,Walk-in,5,Back pain,56,M,261,2.5,Orthopedic,Discharged,No,No,Mandarin,M2K
+ER-1368,2026-01-14,2026-01-14 07:34,2026-01-14 21:50,Ambulance,3,Mental health crisis,56,M,126,14.3,Mental Health,Admitted,Yes,No,Punjabi,L4P
+ER-1369,2026-01-14,2026-01-14 00:31,2026-01-14 07:54,Walk-in,3,Mental health crisis,59,F,64,7.3,Mental Health,Discharged,No,No,English,L4S
+ER-1370,2025-12-23,2025-12-23 18:31,2025-12-23 22:38,Walk-in,3,Difficulty breathing,89,F,47,4.2,Respiratory,Discharged,No,No,English,L4S
+ER-1371,2026-02-13,2026-02-13 08:03,2026-02-14 08:01,Ambulance,2,Fall,36,M,42,24.0,Orthopedic,Admitted,Yes,No,Arabic,M4W
+ER-1372,2026-02-01,2026-02-01 15:52,2026-02-02 07:51,Ambulance,2,Difficulty breathing,38,M,43,16.0,Respiratory,Discharged,No,No,English,M2K
+ER-1373,2026-02-03,2026-02-03 09:50,2026-02-03 14:26,Walk-in,3,Sepsis concern,15,F,124,4.6,Infection,Discharged,No,No,English,L6A
+ER-1374,2025-11-27,2025-11-27 08:58,2025-11-27 11:16,Referral,4,Abdominal pain,63,F,72,2.3,GI,Discharged,No,No,English,L6A
+ER-1375,2026-01-24,2026-01-24 21:16,2026-01-25 11:42,Walk-in,2,Dizziness,31,M,34,14.5,Neuro,Discharged,No,No,Punjabi,M4W
+ER-1376,2026-03-01,2026-03-01 02:16,2026-03-01 08:31,Walk-in,4,Mental health crisis,44,M,115,6.3,Mental Health,Discharged,No,No,French,M2K
+ER-1377,2026-01-29,2026-01-29 17:40,2026-01-30 09:00,Ambulance,2,Rash,65,F,19,15.4,Infection,Discharged,No,No,English,L4S
+ER-1378,2026-01-29,2026-01-29 17:55,2026-01-30 00:14,Ambulance,3,Mental health crisis,5,F,122,6.3,Mental Health,Discharged,No,Yes,Mandarin,L4P
+ER-1379,2025-12-22,2025-12-22 09:07,2025-12-23 18:05,Ambulance,1,Medication refill,45,F,11,33.0,Minor injury,Admitted,Yes,Yes,English,M2K
+ER-1380,2026-02-03,2026-02-03 06:17,2026-02-03 10:12,Walk-in,4,Abdominal pain,82,F,114,3.9,GI,Discharged,No,Yes,French,M2K
+ER-1381,2025-12-27,2025-12-27 00:07,2025-12-27 13:08,Walk-in,2,Fever,34,F,23,13.0,Infection,Admitted,Yes,Yes,English,M2K
+ER-1382,2026-02-13,2026-02-13 22:29,2026-02-14 02:19,Walk-in,4,Mental health crisis,56,M,146,3.8,Mental Health,Discharged,No,No,English,M4W
+ER-1383,2025-12-23,2025-12-23 22:44,2025-12-24 03:45,Walk-in,5,Difficulty breathing,68,X,361,5.0,Respiratory,Discharged,No,No,Punjabi,L6A
+ER-1384,2025-12-19,2025-12-19 05:46,2025-12-19 08:36,Walk-in,4,Ankle injury,63,M,48,2.8,Orthopedic,Observation,No,No,Punjabi,M2K
+ER-1385,2026-01-16,2026-01-16 00:45,2026-01-16 06:22,Referral,4,Dizziness,37,M,621,5.6,Neuro,Discharged,No,No,English,L4P
+ER-1386,2026-02-20,2026-02-20 02:56,2026-02-21 11:22,Walk-in,1,Stroke symptoms,62,F,1,32.4,Neuro,Admitted,Yes,No,English,L6A
+ER-1387,2025-11-22,2025-11-22 01:37,2025-11-22 11:14,Ambulance,2,Ankle injury,30,M,20,9.6,Orthopedic,Discharged,No,No,English,L6A
+ER-1388,2025-12-25,2025-12-25 19:56,2025-12-26 04:30,Ambulance,2,Rash,33,F,19,8.6,Infection,Admitted,Yes,No,English,L3R
+ER-1389,2026-02-27,2026-02-27 21:24,2026-02-28 00:09,Walk-in,5,Medication refill,27,M,371,2.8,Minor injury,Left Without Being Seen,No,No,Tagalog,L6A
+ER-1390,2026-01-29,2026-01-29 03:40,2026-01-29 06:07,Walk-in,5,Medication refill,65,M,194,2.4,Minor injury,Discharged,No,No,,L6A
+ER-1391,2026-02-07,2026-02-07 17:55,2026-02-07 23:35,Walk-in,4,Medication refill,3,M,93,5.7,Minor injury,Discharged,No,No,English,M4W
+ER-1392,2026-02-13,2026-02-13 04:18,2026-02-13 08:07,Walk-in,5,Mental health crisis,20,F,450,3.8,Mental Health,Discharged,No,Yes,Punjabi,M4W
+ER-1393,2026-02-13,2026-02-13 08:48,2026-02-13 19:21,Walk-in,2,Mental health crisis,61,F,34,10.6,Mental Health,Discharged,No,No,English,L4S
+ER-1394,2025-11-01,2025-11-01 14:23,2025-11-01 22:34,Walk-in,3,Chest pain,81,M,25,8.2,Cardiac,Left Without Being Seen,No,No,English,L4P
+ER-1395,2025-12-16,2025-12-16 17:16,2025-12-17 14:10,Ambulance,1,Headache,62,M,214,20.9,Neuro,Admitted,Yes,No,Punjabi,M2K
+ER-1396,2025-11-03,2025-11-03 20:59,2025-11-04 00:30,Walk-in,5,Chest pain,29,M,417,3.5,Cardiac,Discharged,No,No,English,M4W
+ER-1397,2026-02-20,2026-02-20 01:04,2026-02-20 13:10,,3,Chest pain,51,M,95,12.1,Cardiac,Observation,No,No,English,M2K
+ER-1398,2025-12-20,2025-12-20 04:42,2025-12-20 12:10,Ambulance,3,Ankle injury,27,M,139,7.5,Orthopedic,Left Without Being Seen,No,No,English,L4P
+ER-1399,2025-12-19,2025-12-19 06:43,2025-12-19 07:48,Walk-in,5,Laceration,47,F,115,1.0,Minor injury,Discharged,No,No,English,L6A
+ER-1400,2025-12-11,2025-12-11 07:26,2025-12-12 01:14,Ambulance,2,Back pain,57,M,22,17.8,Orthopedic,Admitted,Yes,No,English,L4N
+ER-1401,2025-12-10,2025-12-10 23:57,2025-12-11 04:00,Walk-in,3,Headache,63,M,52,4.0,Neuro,Discharged,No,No,English,M2K
+ER-1402,2025-12-09,2025-12-09 18:39,2025-12-09 21:12,Referral,5,Shortness of breath,21,M,242,2.5,Respiratory,Discharged,No,No,English,L4N
+ER-1403,2026-02-28,2026-02-28 07:41,2026-02-28 15:54,Ambulance,3,Dizziness,24,F,139,8.2,Neuro,Admitted,Yes,No,Punjabi,L4G
+ER-1404,2025-11-08,2025-11-08 23:19,2025-11-09 06:35,Walk-in,3,Difficulty breathing,34,F,90,7.2,Respiratory,Left Without Being Seen,No,No,English,L4G
+ER-1405,2025-11-12,2025-11-12 11:59,2025-11-13 01:07,Ambulance,2,Medication refill,33,F,13,13.2,Minor injury,Observation,No,No,French,L3R
+ER-1406,2025-11-13,2025-11-13 12:01,2025-11-13 16:42,,4,Shortness of breath,27,M,145,4.6,Respiratory,Observation,No,No,English,L4S
+ER-1407,2025-11-06,2025-11-06 10:24,2025-11-06 18:10,Walk-in,4,Mental health crisis,61,M,66,7.7,Mental Health,Discharged,No,No,English,L4G
+ER-1408,2026-02-25,2026-02-25 03:27,2026-02-25 06:33,Referral,4,Sepsis concern,55,M,221,3.1,Infection,Discharged,No,No,English,M2K
+ER-1409,2025-12-19,2025-12-19 22:25,2025-12-20 05:16,Walk-in,4,Shortness of breath,61,F,222,6.8,Respiratory,Discharged,No,No,French,M2K
+ER-1410,2026-01-17,2026-01-17 00:20,2026-01-17 02:56,Walk-in,3,Fall,54,F,95,2.6,Orthopedic,Discharged,No,No,Mandarin,L6A
+ER-1411,2025-11-23,2025-11-23 04:10,2025-11-23 09:07,Walk-in,4,Rash,49,F,191,5.0,Infection,Discharged,No,No,English,M4W
+ER-1412,2025-12-04,2025-12-04 05:30,2025-12-04 14:45,Walk-in,4,Back pain,36,F,190,9.2,Orthopedic,Admitted,Yes,No,,M2K
+ER-1413,2026-01-31,2026-01-31 06:42,2026-01-31 14:45,Ambulance,2,Ankle injury,81,F,28,8.1,Orthopedic,Discharged,No,No,English,L4G
+ER-1414,2025-11-18,2025-11-18 03:09,2025-11-18 08:37,Walk-in,4,Headache,2,M,257,5.5,Neuro,Discharged,No,No,English,L4G
+ER-1415,2026-01-05,2026-01-05 00:25,2026-01-05 07:01,Walk-in,4,Chest pain,29,F,218,6.6,Cardiac,Observation,No,No,English,L4N
+ER-1416,2026-02-28,2026-02-28 16:15,2026-03-01 08:19,Walk-in,2,Difficulty breathing,61,F,37,16.0,Respiratory,,Yes,Yes,Spanish,L6A
+ER-1417,2025-12-03,2025-12-03 23:15,2025-12-04 01:14,Walk-in,4,Medication refill,14,M,113,2.0,Minor injury,Observation,No,No,English,M4W
+ER-1418,2025-11-05,2025-11-05 02:55,2025-11-05 04:49,,5,Mental health crisis,82,M,206,1.9,Mental Health,Discharged,No,No,English,M4W
+ER-1419,2026-02-07,2026-02-07 07:07,2026-02-07 18:08,Ambulance,3,Chest pain,11,M,80,11.1,Cardiac,Discharged,No,No,French,L6A
+ER-1420,2026-01-29,2026-01-29 12:09,2026-01-30 06:41,Ambulance,2,Shortness of breath,97,M,17,18.6,Respiratory,Admitted,Yes,Yes,,L6A
+ER-1421,2026-01-05,2026-01-05 22:15,2026-01-06 09:58,Walk-in,3,Chest pain,43,F,78,11.8,Cardiac,Discharged,No,Yes,French,L4P
+ER-1422,2025-11-02,2025-11-02 16:39,2025-11-02 22:46,Ambulance,2,Back pain,64,M,31,6.2,Orthopedic,Discharged,No,No,English,M4W
+ER-1423,2025-11-25,2025-11-25 18:23,2025-11-27 03:15,Ambulance,1,Headache,25,M,4,32.8,Neuro,Admitted,Yes,No,English,L4N
+ER-1424,2026-01-01,2026-01-01 13:56,2026-01-01 19:48,Walk-in,3,Fever,39,F,41,5.8,Infection,Discharged,No,No,English,M4W
+ER-1425,2026-01-17,2026-01-17 10:00,2026-01-17 17:52,Walk-in,2,Shortness of breath,18,F,40,7.8,Respiratory,Discharged,No,No,English,L4N
+ER-1426,2026-02-10,2026-02-10 04:47,2026-02-10 05:42,Walk-in,5,Ankle injury,32,F,397,1.0,Orthopedic,Left Without Being Seen,No,No,Tagalog,L4N
+ER-1427,2025-12-06,2025-12-06 20:44,2025-12-07 00:45,Walk-in,4,Fever,85,M,72,4.1,Infection,Left Without Being Seen,No,No,French,M2K
+ER-1428,2026-02-01,2026-02-01 19:17,2026-02-01 21:09,Walk-in,5,Back pain,40,F,162,1.9,Orthopedic,Discharged,No,No,Tagalog,L6A
+ER-1429,2025-12-02,2025-12-02 00:36,2025-12-02 04:49,Walk-in,3,Medication refill,9,M,102,4.2,Minor injury,,No,Yes,Arabic,L4G
+ER-1430,2026-01-09,2026-01-09 17:10,2026-01-10 14:50,Ambulance,1,Stroke symptoms,39,F,8,21.7,Neuro,Admitted,Yes,No,English,L3R
+ER-1431,2026-02-16,2026-02-16 02:01,2026-02-16 03:37,Walk-in,5,Fever,70,F,405,1.6,Infection,Discharged,No,No,Punjabi,L4S
+ER-1432,2026-02-27,2026-02-27 17:44,2026-02-28 01:04,Referral,4,Chest pain,49,F,180,7.4,Cardiac,Discharged,No,No,,L4N
+ER-1433,2026-02-28,2026-02-28 19:49,2026-03-01 04:58,Referral,3,Back pain,17,M,86,9.1,Orthopedic,Admitted,Yes,No,Punjabi,L6A
+ER-1434,2025-12-13,2025-12-13 03:08,2025-12-13 05:36,Walk-in,4,Ankle injury,69,M,182,2.5,Orthopedic,Observation,No,No,French,M4W
+ER-1435,2025-12-17,2025-12-17 10:24,2025-12-17 13:01,Walk-in,5,Back pain,65,M,141,2.7,Orthopedic,Observation,No,No,Tagalog,M2K
+ER-1436,2025-12-25,2025-12-25 02:58,2025-12-25 05:19,Walk-in,4,Headache,53,F,259,2.3,Neuro,Discharged,No,No,English,L4G
+ER-1437,2025-12-23,2025-12-23 13:36,2025-12-23 19:46,Ambulance,3,Dizziness,39,F,137,6.1,Neuro,Discharged,No,No,English,M4W
+ER-1438,2025-11-21,2025-11-21 22:15,2025-11-22 02:34,Walk-in,4,Abdominal pain,28,M,77,4.4,GI,Discharged,No,No,Arabic,L4S
+ER-1439,2025-11-25,2025-11-25 01:56,2025-11-25 15:43,Walk-in,2,Headache,10,F,26,13.8,Neuro,Admitted,Yes,No,English,L4N
+ER-1440,2025-11-07,2025-11-07 09:32,2025-11-08 01:06,Walk-in,2,Rash,19,F,26,15.5,Infection,Admitted,Yes,No,English,L4P
+ER-1441,2025-12-19,2025-12-19 23:21,2025-12-20 11:11,Walk-in,3,Chest pain,60,M,36,11.8,Cardiac,Discharged,No,No,English,L6A
+ER-1442,2026-01-19,2026-01-19 07:13,2026-01-20 09:05,Ambulance,1,Laceration,66,M,11,25.8,Minor injury,Admitted,Yes,No,English,L6A
+ER-1443,2026-01-03,2026-01-03 03:10,2026-01-04 18:27,Walk-in,1,Stroke symptoms,58,F,6,39.3,Neuro,Admitted,Yes,No,English,L3R
+ER-1444,2025-12-23,2025-12-23 11:43,2025-12-23 23:48,,2,Back pain,40,M,28,12.1,Orthopedic,Discharged,No,No,Spanish,L4G
+ER-1445,2025-11-21,2025-11-21 12:12,2025-11-21 16:50,Walk-in,3,Abdominal pain,70,F,84,4.6,GI,Discharged,No,Yes,Punjabi,M4W
+ER-1446,2025-12-06,2025-12-06 15:54,2025-12-06 16:44,Walk-in,5,Back pain,21,F,179,0.9,Orthopedic,Discharged,No,No,Tagalog,L4P
+ER-1447,2025-11-23,2025-11-23 07:31,2025-11-23 11:04,Walk-in,3,Abdominal pain,86,F,78,3.6,GI,Discharged,No,No,English,M4W
+ER-1448,2026-01-29,2026-01-29 22:56,2026-01-30 00:39,Walk-in,5,Medication refill,68,M,375,1.7,Minor injury,Discharged,No,No,French,L4P
+ER-1449,2026-02-01,2026-02-01 12:30,2026-02-01 15:08,Walk-in,5,Dizziness,66,M,366,2.6,Neuro,Left Without Being Seen,No,No,English,L6A
+ER-1450,2025-12-09,2025-12-09 06:52,2025-12-09 12:06,Ambulance,3,Headache,20,M,83,5.3,Neuro,Observation,No,No,,L4P
+ER-1451,2026-01-28,2026-01-28 23:02,2026-01-29 11:38,Ambulance,3,Rash,92,F,36,12.6,Infection,Admitted,Yes,No,French,M4W
+ER-1452,2025-11-28,2025-11-28 22:11,2025-11-29 00:58,Walk-in,4,Dizziness,26,F,165,2.8,Neuro,Observation,No,No,Spanish,M4W
+ER-1453,2025-12-24,2025-12-24 11:58,2025-12-24 14:58,Walk-in,5,Fever,42,F,261,3.0,Infection,Observation,No,No,English,M4W
+ER-1454,2026-01-21,2026-01-21 00:35,2026-01-21 05:46,Walk-in,4,Shortness of breath,48,F,85,5.1,Respiratory,Observation,No,No,French,M4W
+ER-1455,2026-01-15,2026-01-15 14:19,2026-01-15 16:56,Walk-in,4,Abdominal pain,82,X,207,2.7,GI,Discharged,No,No,English,M2K
+ER-1456,2026-01-14,2026-01-14 13:19,2026-01-15 02:36,Ambulance,2,Headache,51,M,14,13.2,Neuro,Admitted,Yes,No,English,L4P
+ER-1457,2026-02-22,2026-02-22 03:33,2026-02-22 04:26,,5,Dizziness,47,F,360,0.9,Neuro,Discharged,No,No,English,L4G
+ER-1458,2026-02-19,2026-02-19 15:12,2026-02-20 06:45,Walk-in,2,Mental health crisis,48,F,13,15.5,Mental Health,Discharged,No,No,,L4P
+ER-1459,2026-02-17,2026-02-17 20:10,2026-02-18 02:33,Ambulance,3,Fall,78,M,46,6.4,Orthopedic,Discharged,No,No,English,L4N
+ER-1460,2025-11-22,2025-11-22 02:32,2025-11-22 11:18,Ambulance,2,Fall,70,F,41,8.8,Orthopedic,,Yes,No,English,L6A
+ER-1461,2025-12-30,2025-12-30 17:21,2025-12-31 18:30,Walk-in,1,Stroke symptoms,24,M,9,25.1,Neuro,Admitted,Yes,No,Tagalog,L4S
+ER-1462,2025-12-06,2025-12-06 03:22,2025-12-06 06:42,Walk-in,4,Headache,37,M,196,3.3,Neuro,Discharged,No,No,Arabic,L4G
+ER-1463,2025-11-09,2025-11-09 17:58,2025-11-09 21:06,,4,Laceration,40,F,187,3.2,Minor injury,Discharged,No,No,,L3R
+ER-1464,2025-11-14,2025-11-14 10:03,2025-11-14 13:17,Referral,3,Laceration,84,F,117,3.2,Minor injury,Observation,No,No,Tagalog,L4G
+ER-1465,2025-12-05,2025-12-05 00:09,2025-12-05 12:30,Ambulance,2,Back pain,60,F,45,12.3,Orthopedic,Discharged,No,No,English,M2K
+ER-1466,2025-11-11,2025-11-11 23:11,2025-11-12 10:16,Walk-in,4,Ankle injury,59,M,97,11.1,Orthopedic,Admitted,Yes,No,English,M2K
+ER-1467,2026-01-30,2026-01-30 03:58,2026-01-30 05:09,Walk-in,5,Back pain,55,M,267,1.1,Orthopedic,Discharged,No,No,English,L4N
+ER-1468,2025-11-03,2025-11-03 14:18,2025-11-04 05:20,Ambulance,2,Shortness of breath,53,F,41,15.0,Respiratory,Admitted,Yes,No,English,M4W
+ER-1469,2025-11-25,2025-11-25 04:21,2025-11-25 08:37,Walk-in,4,Fall,21,M,210,4.3,Orthopedic,Discharged,No,No,English,M2K
+ER-1470,2026-02-21,2026-02-21 22:23,2026-02-22 13:42,Ambulance,2,Difficulty breathing,46,M,30,15.4,Respiratory,Discharged,No,Yes,English,L3R
+ER-1471,2026-01-25,2026-01-25 17:43,2026-01-26 23:27,Walk-in,1,Stroke symptoms,53,F,11,29.7,Neuro,Admitted,Yes,No,English,L4G
+ER-1472,2025-11-19,2025-11-19 19:18,2025-11-20 08:33,Ambulance,2,Headache,62,M,36,13.3,Neuro,Admitted,Yes,No,French,L4N
+ER-1473,2025-11-15,2025-11-15 10:22,2025-11-15 17:07,Walk-in,3,Fever,32,X,70,6.7,Infection,Observation,No,No,English,L4S
+ER-1474,2026-02-21,2026-02-21 11:13,2026-02-21 14:07,Walk-in,5,Fall,54,F,239,2.9,Orthopedic,Left Without Being Seen,No,No,,L4P
+ER-1475,2026-02-27,2026-02-27 15:13,2026-02-27 20:55,Ambulance,3,Dizziness,27,M,45,5.7,Neuro,Observation,No,Yes,English,L4N
+ER-1476,2026-02-21,2026-02-21 18:50,2026-02-21 20:40,Walk-in,5,Back pain,43,M,143,1.9,Orthopedic,Discharged,No,Yes,English,L3R
+ER-1477,2026-01-16,2026-01-16 20:19,2026-01-16 23:51,Walk-in,4,Laceration,32,M,96,3.5,Minor injury,Discharged,No,No,English,L3R
+ER-1478,2026-01-31,2026-01-31 00:25,2026-01-31 04:09,Walk-in,4,Sepsis concern,73,F,150,3.8,Infection,Discharged,No,No,English,L6A
+ER-1479,2026-02-05,2026-02-05 15:55,2026-02-06 00:30,Ambulance,2,Back pain,87,M,37,8.6,Orthopedic,Admitted,Yes,No,,L4S
+ER-1480,2025-11-07,2025-11-07 02:37,2025-11-07 14:35,Ambulance,2,Back pain,47,M,16,11.9,Orthopedic,Observation,No,No,English,L4G
+ER-1481,2025-11-14,2025-11-14 06:54,2025-11-14 12:11,Walk-in,4,Dizziness,63,F,92,5.2,Neuro,Discharged,No,No,Punjabi,L4S
+ER-1482,2025-12-31,2025-12-31 19:54,2025-12-31 23:17,Walk-in,4,Rash,37,M,171,3.3,Infection,Discharged,No,No,English,M4W
+ER-1483,2025-12-27,2025-12-27 06:00,2025-12-27 08:23,Walk-in,5,Sepsis concern,9,F,151,2.3,Infection,Discharged,No,No,Punjabi,M4W
+ER-1484,2026-02-09,2026-02-09 19:07,2026-02-10 03:50,Ambulance,3,Rash,53,F,132,8.7,Infection,Discharged,No,No,English,L4N
+ER-1485,2025-11-21,2025-11-21 11:06,2025-11-21 15:21,Walk-in,4,Headache,37,F,242,4.3,Neuro,Discharged,No,No,English,M4W
+ER-1486,2026-01-17,2026-01-17 05:35,2026-01-17 07:51,Walk-in,5,Fever,27,F,300,2.2,Infection,Discharged,No,No,English,L3R
+ER-1487,2026-01-25,2026-01-25 08:01,2026-01-25 13:04,Walk-in,5,Chest pain,63,F,349,5.0,Cardiac,Discharged,No,No,Punjabi,L3R
+ER-1488,2026-01-20,2026-01-20 12:44,2026-01-20 16:07,Walk-in,4,Abdominal pain,32,F,177,3.3,GI,Discharged,No,No,English,M2K
+ER-1489,2026-01-08,2026-01-08 18:21,2026-01-08 22:23,Walk-in,4,Rash,79,F,165,4.0,Infection,Discharged,No,Yes,English,M2K
+ER-1490,2025-12-01,2025-12-01 14:32,2025-12-01 22:10,Walk-in,3,Chest pain,58,F,78,7.7,Cardiac,Discharged,No,No,Tagalog,L4N
+ER-1491,2026-02-28,2026-02-28 22:23,2026-03-01 05:29,Walk-in,4,Mental health crisis,68,M,186,7.1,Mental Health,Discharged,No,No,Punjabi,L6A
+ER-1492,2025-11-02,2025-11-02 20:49,2025-11-03 01:06,Walk-in,5,Chest pain,19,F,197,4.3,Cardiac,Discharged,No,No,English,L4P
+ER-1493,2025-11-27,2025-11-27 18:04,2025-11-27 19:44,Walk-in,5,Sepsis concern,61,F,257,1.6,Infection,Discharged,No,No,English,L4S
+ER-1494,2025-11-30,2025-11-30 14:28,2025-11-30 22:09,Walk-in,3,Mental health crisis,26,M,125,7.7,Mental Health,Discharged,No,No,English,L4S
+ER-1495,2025-11-03,2025-11-03 06:57,2025-11-04 02:37,Ambulance,2,Medication refill,49,M,300,19.7,Minor injury,Admitted,Yes,No,Tagalog,L4P
+ER-1496,2026-02-02,2026-02-02 09:54,2026-02-02 11:31,Referral,5,Chest pain,68,M,417,1.7,Cardiac,Discharged,No,No,Punjabi,L4N
+ER-1497,2025-12-02,2025-12-02 02:51,2025-12-02 17:13,Ambulance,2,Rash,20,F,24,14.3,Infection,Discharged,No,No,English,L4P
+ER-1498,2026-01-11,2026-01-11 08:58,2026-01-11 11:49,Walk-in,4,Chest pain,65,F,201,2.8,Cardiac,Discharged,No,No,Mandarin,L4N
+ER-1499,2026-02-19,2026-02-19 22:14,2026-02-21 00:03,Walk-in,1,Stroke symptoms,30,M,5,25.9,Neuro,Admitted,Yes,No,Arabic,L4G
+ER-1500,2025-12-24,2025-12-24 10:13,2025-12-24 13:30,,5,Laceration,40,F,237,3.3,Minor injury,Left Without Being Seen,No,No,English,L4N
+ER-1501,2026-01-05,2026-01-05 02:43,2026-01-05 09:19,Ambulance,3,Sepsis concern,23,M,44,6.6,Infection,Discharged,No,Yes,Tagalog,M2K
+ER-1502,2026-01-17,2026-01-17 15:38,2026-01-17 22:38,Walk-in,3,Dizziness,66,F,98,7.0,Neuro,Discharged,No,No,English,L3R
+ER-1503,2025-11-10,2025-11-10 23:06,2025-11-11 03:11,Referral,4,Difficulty breathing,23,M,256,4.0,Respiratory,Discharged,No,No,French,L6A
+ER-1504,2025-11-26,2025-11-26 20:49,2025-11-28 05:39,Ambulance,1,Dizziness,53,F,5,32.9,Neuro,Admitted,Yes,No,English,L4G
+ER-1505,2026-01-29,2026-01-29 06:34,2026-01-29 11:50,Walk-in,3,Rash,85,M,103,5.3,Infection,Discharged,No,No,Tagalog,M4W
+ER-1506,2026-02-13,2026-02-13 10:53,2026-02-13 15:13,Referral,3,Abdominal pain,16,F,100,4.4,GI,Discharged,No,No,English,L4N
+ER-1507,2025-12-25,2025-12-25 12:44,2025-12-25 15:59,Walk-in,3,Medication refill,51,M,119,3.3,Minor injury,Discharged,No,No,Spanish,L4P
+ER-1508,2026-01-17,2026-01-17 05:56,2026-01-17 08:42,Ambulance,3,Ankle injury,57,F,51,2.7,Orthopedic,Discharged,No,No,English,M2K
+ER-1509,2026-02-15,2026-02-15 06:26,2026-02-15 08:19,Walk-in,4,Headache,56,M,171,1.8,Neuro,Left Without Being Seen,No,No,English,L4P
+ER-1510,2026-01-26,2026-01-26 05:40,2026-01-27 14:17,Ambulance,1,Stroke symptoms,40,F,12,32.7,Neuro,Admitted,Yes,No,French,L4G
+ER-1511,2025-11-24,2025-11-24 23:52,2025-11-26 03:59,Ambulance,1,Rash,39,M,12,28.1,Infection,Admitted,Yes,Yes,English,M2K
+ER-1512,2026-02-21,2026-02-21 17:54,2026-02-21 19:51,Walk-in,5,Ankle injury,38,M,320,2.0,Orthopedic,Discharged,No,No,English,L4S
+ER-1513,2025-12-11,2025-12-11 20:10,2025-12-12 01:07,Walk-in,4,Sepsis concern,34,F,251,5.0,Infection,Discharged,No,Yes,English,M2K
+ER-1514,2025-12-22,2025-12-22 19:35,2025-12-23 03:57,Walk-in,3,Chest pain,7,M,68,8.4,Cardiac,,Yes,No,English,L6A
+ER-1515,2026-02-08,2026-02-08 23:01,2026-02-09 03:40,Ambulance,3,Sepsis concern,14,M,71,4.7,Infection,Observation,No,No,Punjabi,L4N
+ER-1516,2026-03-01,2026-03-01 02:31,2026-03-01 05:43,Walk-in,5,Medication refill,35,F,214,3.2,Minor injury,Observation,No,No,English,L4S
+ER-1517,2026-01-30,2026-01-30 21:09,2026-02-01 01:44,Ambulance,1,Laceration,44,M,2,28.5,Minor injury,Admitted,Yes,No,French,L4N
+ER-1518,2025-12-25,2025-12-25 01:35,2025-12-25 05:42,Walk-in,4,Laceration,17,F,224,4.1,Minor injury,Discharged,No,No,English,L4P
+ER-1519,2025-11-14,2025-11-14 11:24,2025-11-15 17:56,Walk-in,1,Stroke symptoms,68,F,3,30.5,Neuro,Admitted,Yes,No,English,M4W
+ER-1520,2025-11-20,2025-11-20 14:15,2025-11-20 17:03,Walk-in,5,Laceration,0,F,177,2.8,Minor injury,Discharged,No,No,French,L4P
+ER-1521,2025-11-17,2025-11-17 08:35,2025-11-18 03:06,Ambulance,2,Shortness of breath,57,M,303,18.6,Respiratory,Admitted,Yes,No,English,L6A
+ER-1522,2025-12-18,2025-12-18 03:30,2025-12-18 12:43,Walk-in,3,Shortness of breath,56,M,51,9.3,Respiratory,,No,No,English,M2K
+ER-1523,2025-11-20,2025-11-20 04:36,2025-11-20 08:21,Walk-in,3,Fever,59,M,67,3.8,Infection,Discharged,No,Yes,French,M2K
+ER-1524,2026-02-07,2026-02-07 19:47,2026-02-07 22:56,Walk-in,4,Fall,78,M,96,3.2,Orthopedic,Discharged,No,No,English,L4S
+ER-1525,2026-02-03,2026-02-03 07:38,2026-02-04 06:54,Ambulance,2,Difficulty breathing,62,F,17,23.2,Respiratory,Admitted,Yes,Yes,English,L4G
+ER-1526,2025-12-16,2025-12-16 07:26,2025-12-17 10:12,Walk-in,1,Stroke symptoms,46,M,4,26.7,Neuro,Admitted,Yes,No,Punjabi,M4W
+ER-1527,2025-12-30,2025-12-30 22:09,2025-12-31 13:49,Ambulance,3,Sepsis concern,52,X,49,15.6,Infection,,Yes,No,English,L3R
+ER-1528,2026-01-22,2026-01-22 03:27,2026-01-22 09:53,Walk-in,4,Difficulty breathing,74,X,225,6.4,Respiratory,Left Without Being Seen,No,No,Arabic,L3R
+ER-1529,2026-02-23,2026-02-23 21:57,2026-02-24 05:52,Ambulance,3,Shortness of breath,62,M,32,7.9,Respiratory,Discharged,No,No,English,M2K
+ER-1530,2025-12-17,2025-12-17 22:06,2025-12-18 01:26,Walk-in,4,Medication refill,63,M,60,3.3,Minor injury,Discharged,No,No,English,L3R
+ER-1531,2026-01-11,2026-01-11 14:21,2026-01-12 04:02,Walk-in,2,Stroke symptoms,13,M,37,13.7,Neuro,Discharged,No,Yes,English,L4G
+ER-1532,2026-01-22,2026-01-22 03:58,2026-01-22 07:24,Referral,4,Mental health crisis,31,M,484,3.4,Mental Health,Discharged,No,No,English,M2K
+ER-1533,2026-01-06,2026-01-06 03:44,2026-01-06 21:59,Walk-in,2,Shortness of breath,57,M,21,18.2,Respiratory,Admitted,Yes,No,Punjabi,L4N
+ER-1534,2025-11-15,2025-11-15 06:49,2025-11-15 10:40,Walk-in,4,Shortness of breath,26,F,127,3.8,Respiratory,Discharged,No,Yes,Punjabi,L4P
+ER-1535,2025-11-24,2025-11-24 13:51,2025-11-24 22:04,Ambulance,3,Dizziness,16,F,76,8.2,Neuro,Discharged,No,No,English,M4W
+ER-1536,2026-01-13,2026-01-13 03:41,2026-01-13 12:18,Walk-in,3,Fever,54,F,63,8.7,Infection,Left Without Being Seen,No,No,,L6A
+ER-1537,2025-11-22,2025-11-22 10:56,2025-11-22 17:46,Walk-in,3,Back pain,55,F,134,6.8,Orthopedic,Admitted,Yes,No,Punjabi,L4P
+ER-1538,2025-12-02,2025-12-02 02:46,2025-12-02 15:51,Ambulance,2,Headache,63,F,16,13.1,Neuro,Admitted,Yes,No,French,M4W
+ER-1539,2025-12-17,2025-12-17 12:58,2025-12-17 18:31,Walk-in,4,Fever,46,M,80,5.5,Infection,Admitted,Yes,No,English,M4W
+ER-1540,2026-01-27,2026-01-27 00:30,2026-01-27 04:12,Walk-in,4,Headache,0,F,220,3.7,Neuro,Discharged,No,No,English,L6A
+ER-1541,2025-12-04,2025-12-04 17:01,2025-12-05 02:17,Ambulance,2,Headache,54,F,38,9.2,Neuro,Left Without Being Seen,No,No,English,M4W
+ER-1542,2026-02-13,2026-02-13 01:19,2026-02-13 02:53,Walk-in,4,Dizziness,22,F,55,1.6,Neuro,Discharged,No,No,Punjabi,L4N
+ER-1543,2025-12-09,2025-12-09 04:40,2025-12-09 20:45,Walk-in,3,Headache,82,F,35,16.0,Neuro,Admitted,Yes,No,English,L4N
+ER-1544,2025-12-12,2025-12-12 04:11,2025-12-12 06:57,Walk-in,4,Back pain,54,M,252,2.7,Orthopedic,Left Without Being Seen,No,Yes,Tagalog,L4N
+ER-1545,2025-11-15,2025-11-15 19:56,2025-11-16 02:18,Ambulance,3,Fall,24,M,113,6.4,Orthopedic,Discharged,No,No,,L6A
+ER-1546,2025-12-24,2025-12-24 01:16,2025-12-24 06:46,Walk-in,3,Fall,26,M,106,5.5,Orthopedic,Discharged,No,No,English,L4N
+ER-1547,2025-12-14,2025-12-14 10:18,2025-12-14 13:48,Walk-in,5,Sepsis concern,72,M,342,3.5,Infection,Discharged,No,Yes,Arabic,L4S
+ER-1548,2026-01-26,2026-01-26 14:11,2026-01-26 17:26,Walk-in,4,Back pain,82,F,135,3.2,Orthopedic,Observation,No,No,English,L3R
+ER-1549,2025-11-15,2025-11-15 12:23,2025-11-15 16:55,Walk-in,5,Shortness of breath,53,M,351,4.5,Respiratory,Discharged,No,No,English,L4P
+ER-1550,2026-02-05,2026-02-05 16:20,2026-02-06 01:12,Walk-in,3,Dizziness,0,M,76,8.8,Neuro,Discharged,No,No,English,L4S
+ER-1551,2025-11-11,2025-11-11 19:16,2025-11-11 21:03,Walk-in,5,Laceration,38,M,311,1.8,Minor injury,Discharged,No,No,Mandarin,M4W
+ER-1552,2026-02-26,2026-02-26 09:26,2026-02-26 12:38,Walk-in,3,Back pain,61,M,51,3.2,Orthopedic,Discharged,No,No,English,L6A
+ER-1553,2025-11-09,2025-11-09 19:52,2025-11-10 03:39,Walk-in,4,Chest pain,22,F,143,7.8,Cardiac,Discharged,No,No,English,L4G
+ER-1554,2026-01-20,2026-01-20 07:37,2026-01-20 09:24,Walk-in,5,Laceration,61,F,204,1.7,Minor injury,Observation,No,No,English,L4P
+ER-1555,2026-02-05,2026-02-05 23:37,2026-02-06 06:41,Walk-in,3,Fall,38,F,58,7.1,Orthopedic,Observation,No,No,English,M2K
+ER-1556,2026-01-26,2026-01-26 12:06,2026-01-26 19:25,Walk-in,3,Back pain,26,F,74,7.3,Orthopedic,Observation,No,No,English,L4G
+ER-1557,2025-11-20,2025-11-20 17:39,2025-11-21 10:17,Walk-in,2,Stroke symptoms,8,M,41,16.7,Neuro,Admitted,Yes,No,French,L4S
+ER-1558,2026-02-25,2026-02-25 21:00,2026-02-25 23:22,Walk-in,5,Fever,82,M,338,2.3,Infection,Discharged,No,Yes,French,L4P
+ER-1559,2026-01-06,2026-01-06 19:01,2026-01-06 20:12,Walk-in,5,Fall,68,M,186,1.2,Orthopedic,Discharged,No,No,English,L4S
+ER-1560,2026-02-06,2026-02-06 20:25,2026-02-07 02:47,Walk-in,3,Dizziness,95,M,31,6.4,Neuro,Discharged,No,No,English,M2K
+ER-1561,2025-12-27,2025-12-27 12:52,2025-12-27 23:23,Ambulance,2,Mental health crisis,20,X,24,10.5,Mental Health,Discharged,No,No,English,L4N
+ER-1562,2025-11-24,2025-11-24 01:02,2025-11-24 17:26,Walk-in,2,Stroke symptoms,17,M,19,16.4,Neuro,Admitted,Yes,No,Tagalog,L3R
+ER-1563,2025-12-31,2025-12-31 11:50,2025-12-31 15:12,Walk-in,5,Rash,54,F,168,3.3,Infection,Observation,No,No,English,L3R
+ER-1564,2025-11-19,2025-11-19 04:21,2025-11-19 05:15,Walk-in,5,Sepsis concern,79,F,227,0.9,Infection,Discharged,No,No,English,M4W
+ER-1565,2025-12-08,2025-12-08 21:20,2025-12-09 07:38,Ambulance,2,Fever,51,M,20,10.3,Infection,Discharged,No,No,English,L6A
+ER-1566,2026-02-25,2026-02-25 05:40,2026-02-25 20:18,Ambulance,2,Ankle injury,26,M,226,14.7,Orthopedic,Discharged,No,No,Tagalog,L4S
+ER-1567,2026-01-13,2026-01-13 05:28,2026-01-13 10:17,Walk-in,4,Abdominal pain,32,M,187,4.9,GI,Discharged,No,No,English,L4P
+ER-1568,2025-11-26,2025-11-26 05:59,2025-11-26 08:34,Walk-in,3,Fall,71,M,27,2.6,Orthopedic,Discharged,No,No,Mandarin,L4G
+ER-1569,2026-01-02,2026-01-02 15:25,2026-01-03 17:54,Walk-in,1,Stroke symptoms,43,M,2,26.4,Neuro,Admitted,Yes,No,English,L3R
+ER-1570,2026-01-23,2026-01-23 13:42,2026-01-23 17:35,Walk-in,4,Shortness of breath,16,F,180,3.8,Respiratory,Left Without Being Seen,No,No,English,L4N
+ER-1571,2025-12-29,2025-12-29 22:46,2025-12-30 02:59,Walk-in,4,Mental health crisis,26,M,192,4.2,Mental Health,Discharged,No,No,English,L4G
+ER-1572,2025-12-05,2025-12-05 09:59,2025-12-05 15:24,Walk-in,4,Mental health crisis,36,F,157,5.4,Mental Health,Discharged,No,No,Arabic,M2K
+ER-1573,2026-02-01,2026-02-01 06:46,2026-02-01 09:57,Walk-in,4,Shortness of breath,65,M,236,3.2,Respiratory,Discharged,No,Yes,English,L3R
+ER-1574,2026-02-16,2026-02-16 01:10,2026-02-16 04:48,Walk-in,3,Rash,64,M,108,3.7,Infection,Discharged,No,No,English,L4P
+ER-1575,2026-01-16,2026-01-16 00:10,2026-01-16 05:23,Ambulance,2,Rash,34,F,41,5.3,Infection,Observation,No,No,Spanish,L4S
+ER-1576,2025-11-04,2025-11-04 08:58,2025-11-04 18:26,Walk-in,2,Difficulty breathing,52,M,310,9.5,Respiratory,Discharged,No,No,English,L4P
+ER-1577,2026-01-17,2026-01-17 22:13,2026-01-18 08:53,Ambulance,2,Fever,0,F,42,10.7,Infection,Discharged,No,No,Punjabi,M2K
+ER-1578,2026-01-18,2026-01-18 12:34,2026-01-18 17:43,Walk-in,3,Ankle injury,55,M,63,5.2,Orthopedic,Discharged,No,No,English,L4N
+ER-1579,2025-12-20,2025-12-20 21:26,2025-12-20 23:53,Walk-in,5,Mental health crisis,78,M,191,2.5,Mental Health,Discharged,No,No,English,M4W
+ER-1580,2026-02-23,2026-02-23 02:26,2026-02-23 07:39,Walk-in,2,Stroke symptoms,48,M,37,5.3,Neuro,Discharged,No,No,English,L4P
+ER-1581,2025-11-17,2025-11-17 02:14,2025-11-17 09:27,Ambulance,2,Rash,0,M,40,7.2,Infection,Observation,No,No,English,M2K
+ER-1582,2026-01-08,2026-01-08 20:00,2026-01-08 22:29,Walk-in,4,Ankle injury,28,X,87,2.4,Orthopedic,Discharged,No,No,French,L6A
+ER-1583,2026-01-06,2026-01-06 02:33,2026-01-06 10:41,Referral,4,Difficulty breathing,81,F,109,8.1,Respiratory,Discharged,No,No,French,L4S
+ER-1584,2026-01-22,2026-01-22 01:14,2026-01-22 07:37,Walk-in,3,Mental health crisis,86,F,53,6.4,Mental Health,Observation,No,No,Punjabi,L6A
+ER-1585,2025-11-30,2025-11-30 09:41,2025-11-30 11:46,Walk-in,5,Rash,15,F,244,2.1,Infection,Discharged,No,No,English,L3R
+ER-1586,2026-02-02,2026-02-02 22:11,2026-02-03 06:33,Walk-in,3,Sepsis concern,37,M,88,8.4,Infection,Discharged,No,No,Arabic,L4N
+ER-1587,2025-11-02,2025-11-02 16:32,2025-11-03 01:10,Walk-in,3,Difficulty breathing,15,M,38,8.7,Respiratory,Discharged,No,No,English,M4W
+ER-1588,2026-01-30,2026-01-30 02:22,2026-01-30 03:17,Referral,5,Laceration,46,M,90,0.9,Minor injury,,No,No,English,M4W
+ER-1589,2025-11-13,2025-11-13 20:05,2025-11-13 22:24,Walk-in,5,Laceration,40,F,419,2.3,Minor injury,Discharged,No,No,English,L3R
+ER-1590,2026-02-05,2026-02-05 20:14,2026-02-05 23:21,Walk-in,5,Shortness of breath,1,M,240,3.2,Respiratory,Observation,No,No,English,L4N
+ER-1591,2025-12-15,2025-12-15 19:13,2025-12-15 21:36,Walk-in,5,Dizziness,47,F,127,2.4,Neuro,Discharged,No,No,English,L6A
+ER-1592,2026-01-31,2026-01-31 21:39,2026-02-01 00:13,Walk-in,4,Sepsis concern,0,M,71,2.6,Infection,Observation,No,No,French,L4S
+ER-1593,2026-01-28,2026-01-28 05:45,2026-01-28 13:05,Referral,5,Ankle injury,6,F,221,7.4,Orthopedic,Admitted,Yes,No,Arabic,M4W
+ER-1594,2025-12-04,2025-12-04 23:30,2025-12-05 06:38,Ambulance,3,Sepsis concern,61,F,72,7.1,Infection,Discharged,No,No,English,L6A
+ER-1595,2026-01-30,2026-01-30 07:41,2026-01-31 02:53,,1,Stroke symptoms,57,M,12,19.2,Neuro,Observation,No,No,English,L4G
+ER-1596,2026-02-23,2026-02-23 19:14,2026-02-24 02:39,Walk-in,2,Back pain,16,F,25,7.4,Orthopedic,Discharged,No,No,English,L6A
+ER-1597,2025-12-23,2025-12-23 13:54,2025-12-24 04:56,Walk-in,1,Stroke symptoms,53,M,10,15.0,Neuro,Discharged,No,No,Punjabi,M2K
+ER-1598,2025-11-12,2025-11-12 18:42,2025-11-12 22:29,Walk-in,4,Medication refill,44,M,144,3.7,Minor injury,Discharged,No,No,English,L4N
+ER-1599,2026-01-21,2026-01-21 15:04,2026-01-21 19:07,Walk-in,4,Dizziness,41,M,462,4.0,Neuro,Discharged,No,No,English,L4P
+ER-1600,2025-11-24,2025-11-24 15:25,2025-11-24 20:50,Walk-in,3,Sepsis concern,45,M,44,5.4,Infection,Observation,No,No,Spanish,L6A
