@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import base64
+import html
 import json
+import re
 import time
 from copy import deepcopy
 from datetime import datetime
@@ -22,6 +24,11 @@ from src.profiler import profile_dataframe
 from src.validator import validate_synthetic_data
 from src.strategies import STRATEGY_LABELS, STRATEGY_DESCRIPTIONS
 from src.dp_noise import PRIVACY_PRESETS
+from src.chat_assistant import (
+    ANTHROPIC_API_KEY as CHAT_ENV_API_KEY,
+    build_chat_context,
+    generate_chat_reply,
+)
 from src.agent_orchestrator import (
     render_agent_orchestration_panel,
     render_agent_timeline,
@@ -69,6 +76,11 @@ STEP_CONFIG = [
         "description": "Download the approved synthetic package for controlled distribution.",
         "owner": "Data Analyst",
     },
+    {
+        "title": "Governed Handoff",
+        "description": "Agent decides whether the package stays internal, is held for review, or can be supported by an external language model.",
+        "owner": "Data Analyst",
+    },
 ]
 
 ROLE_TO_GROUP: dict[str, str] = {
@@ -77,8 +89,8 @@ ROLE_TO_GROUP: dict[str, str] = {
 }
 
 ROLE_VISIBLE_STEPS: dict[str, list[int]] = {
-    "Data Analyst": [0, 1, 2, 3, 4],
-    "Manager / Reviewer": [3, 4],
+    "Data Analyst": [0, 1, 2, 3, 4, 5],
+    "Manager / Reviewer": [3, 4, 5],
 }
 
 ROLE_CONFIGS: dict[str, dict[str, Any]] = {
@@ -591,6 +603,13 @@ def inject_styles() -> None:
                 background: transparent !important;
             }
 
+            /* Streamlit marks the previous render as stale during reruns and
+               lowers opacity. In this workflow it can linger after fast step
+               transitions, which makes an otherwise active page look disabled. */
+            [data-stale="true"] {
+                opacity: 1 !important;
+            }
+
             section[data-testid="stSidebar"],
             [data-testid="collapsedControl"] {
                 display: none !important;
@@ -603,7 +622,7 @@ def inject_styles() -> None:
             }
 
             .banner {
-                background: linear-gradient(180deg, #ffffff 0%, var(--surface-tinted) 100%);
+                background: #ffffff;
                 border: 1.5px solid var(--line);
                 border-radius: 24px;
                 padding: 1.3rem 1.4rem;
@@ -656,7 +675,7 @@ def inject_styles() -> None:
                 justify-content: flex-start;
                 gap: 1rem;
                 align-items: center;
-                background: linear-gradient(180deg, #ffffff 0%, var(--surface-tinted) 100%);
+                background: #ffffff;
                 border: 1.5px solid var(--line);
                 border-radius: 24px;
                 padding: 1rem 1.2rem;
@@ -1095,8 +1114,8 @@ def inject_styles() -> None:
 
             .workflow-progress {
                 display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr));
-                gap: 0.55rem;
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                gap: 0.5rem;
                 margin-bottom: 0.85rem;
             }
 
@@ -1174,7 +1193,7 @@ def inject_styles() -> None:
 
             .workflow-progress-title {
                 color: var(--brand-deep);
-                font-size: 0.94rem;
+                font-size: 0.88rem;
                 font-weight: 800;
                 line-height: 1.22;
                 margin-bottom: 0.24rem;
@@ -1303,6 +1322,884 @@ def inject_styles() -> None:
                 line-height: 1.5;
             }
 
+            .expected-outcome-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.62rem;
+                margin-top: 0.85rem;
+            }
+
+            .expected-outcome-row {
+                display: grid;
+                grid-template-columns: minmax(170px, 0.32fr) minmax(0, 1fr);
+                align-items: center;
+                gap: 0.85rem;
+                padding: 0.78rem 0.9rem;
+                background: linear-gradient(180deg, #ffffff 0%, var(--surface-soft) 100%);
+                border: 1px solid var(--line-soft);
+                border-radius: 15px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+            }
+
+            .expected-outcome-label {
+                color: var(--text);
+                font-size: 0.88rem;
+                font-weight: 700;
+                line-height: 1.35;
+            }
+
+            .expected-outcome-badge {
+                justify-self: stretch;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                min-height: 2.2rem;
+                padding: 0.36rem 0.72rem;
+                background: var(--tone-bg);
+                border: 1px solid var(--tone-border);
+                border-radius: 999px;
+                color: var(--tone-color);
+                font-size: 0.86rem;
+                font-weight: 800;
+                line-height: 1.25;
+                box-sizing: border-box;
+            }
+
+            .expected-outcome-dot {
+                width: 0.45rem;
+                height: 0.45rem;
+                border-radius: 999px;
+                background: var(--tone-color);
+                flex: 0 0 auto;
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.72);
+            }
+
+            @media (max-width: 760px) {
+                .expected-outcome-row {
+                    grid-template-columns: 1fr;
+                    gap: 0.5rem;
+                }
+
+                .expected-outcome-badge {
+                    width: 100%;
+                    border-radius: 14px;
+                }
+            }
+
+            .guidance-overview-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.72rem;
+                margin: 0.85rem 0 0.72rem 0;
+            }
+
+            .guidance-overview-card {
+                background: linear-gradient(180deg, #ffffff 0%, var(--surface-soft) 100%);
+                border: 1px solid var(--line-soft);
+                border-radius: 16px;
+                padding: 0.82rem 0.9rem;
+                min-height: 104px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+            }
+
+            .guidance-overview-label {
+                color: var(--brand);
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.3rem;
+            }
+
+            .guidance-overview-value {
+                color: var(--text);
+                font-size: 1.18rem;
+                font-weight: 800;
+                line-height: 1.18;
+                letter-spacing: -0.01em;
+            }
+
+            .guidance-overview-detail {
+                color: var(--muted);
+                font-size: 0.82rem;
+                line-height: 1.42;
+                margin-top: 0.35rem;
+            }
+
+            .guidance-boundary-card {
+                display: grid;
+                grid-template-columns: 2.4rem minmax(0, 1fr);
+                gap: 0.78rem;
+                align-items: start;
+                background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+                border: 1.5px solid rgba(11, 94, 168, 0.42);
+                border-left: 4px solid var(--brand);
+                border-radius: 16px;
+                margin: 0 0 0.45rem 0;
+                padding: 0.9rem 1rem;
+            }
+
+            .guidance-boundary-icon {
+                width: 2.2rem;
+                height: 2.2rem;
+                border-radius: 12px;
+                background: rgba(11, 94, 168, 0.08);
+                color: var(--brand);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.18rem;
+                font-weight: 900;
+            }
+
+            .guidance-boundary-title {
+                color: var(--brand);
+                font-size: 0.76rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.18rem;
+            }
+
+            .guidance-boundary-text {
+                color: var(--text);
+                font-size: 0.9rem;
+                line-height: 1.55;
+            }
+
+            .guidance-mode-card {
+                background: #ffffff;
+                border: var(--mode-border-width) solid var(--mode-border);
+                border-bottom: 0;
+                border-radius: 16px 16px 0 0;
+                box-shadow: var(--mode-shadow);
+                box-sizing: border-box;
+                height: 176px;
+                padding: 1rem 1.05rem;
+                opacity: var(--mode-opacity);
+            }
+
+            .guidance-mode-action {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 3.25rem;
+                padding: 0.58rem 0.9rem;
+                background: var(--action-color, var(--brand));
+                border: 1.5px solid var(--action-color, var(--brand));
+                border-top: 0;
+                border-radius: 0 0 16px 16px;
+                color: #ffffff;
+                font-size: 0.92rem;
+                font-weight: 800;
+                line-height: 1.2;
+                text-align: center;
+                box-sizing: border-box;
+                box-shadow: 0 10px 22px var(--action-shadow, rgba(11, 94, 168, 0.16));
+            }
+
+            .guidance-mode-action.is-external {
+                --action-color: #136B48;
+                --action-shadow: rgba(19, 107, 72, 0.18);
+            }
+
+            /* "Use Internal version" / "Use External version" switch buttons —
+               explicit class applied via JS (see _inject_guidance_button_styler)
+               because Streamlit 1.56 does not reliably surface the widget key
+               as a DOM class. */
+            button.guidance-switch-btn {
+                font-size: 0.92rem !important;
+                font-weight: 800 !important;
+                line-height: 1.2 !important;
+                min-height: 3.25rem !important;
+                padding: 0.58rem 0.9rem !important;
+                border-radius: 0 0 16px 16px !important;
+                border-width: 1.5px !important;
+                border-top-width: 0 !important;
+                text-transform: none !important;
+                letter-spacing: 0 !important;
+                background: #ffffff !important;
+                box-sizing: border-box !important;
+            }
+            button.guidance-switch-btn.is-internal {
+                color: #0b5ea8 !important;
+                border-color: rgba(11, 94, 168, 0.45) !important;
+            }
+            button.guidance-switch-btn.is-external {
+                color: #136B48 !important;
+                border-color: rgba(19, 107, 72, 0.45) !important;
+            }
+            button.guidance-switch-btn.is-internal:hover {
+                border-color: #0b5ea8 !important;
+                box-shadow: 0 6px 16px rgba(11, 94, 168, 0.18) !important;
+            }
+            button.guidance-switch-btn.is-external:hover {
+                border-color: #136B48 !important;
+                box-shadow: 0 6px 16px rgba(19, 107, 72, 0.18) !important;
+            }
+
+            .guidance-mode-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.65rem;
+                margin-bottom: 0.58rem;
+                flex-wrap: wrap;
+            }
+
+            .guidance-mode-title {
+                color: var(--mode-color);
+                font-size: 1rem;
+                font-weight: 800;
+                line-height: 1.25;
+            }
+
+            .guidance-mode-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.2rem 0.56rem;
+                background: var(--mode-chip-bg);
+                color: var(--mode-chip-color);
+                border: 1px solid var(--mode-chip-border);
+                border-radius: 999px;
+                font-size: 0.66rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+
+            .guidance-mode-text {
+                color: var(--text);
+                font-size: 0.86rem;
+                line-height: 1.55;
+            }
+
+            .guidance-readiness-grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 0.52rem;
+                margin-top: 0.85rem;
+            }
+
+            .guidance-condition {
+                display: flex;
+                gap: 0.5rem;
+                align-items: flex-start;
+                min-height: 82px;
+                padding: 0.65rem 0.72rem;
+                background: var(--condition-bg);
+                border: 1px solid var(--condition-border);
+                border-radius: 14px;
+            }
+
+            .guidance-condition-dot {
+                width: 0.58rem;
+                height: 0.58rem;
+                border-radius: 999px;
+                margin-top: 0.28rem;
+                flex: 0 0 auto;
+                background: var(--condition-color);
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.76);
+            }
+
+            .guidance-condition-title {
+                color: var(--text);
+                font-size: 0.78rem;
+                font-weight: 800;
+                line-height: 1.28;
+            }
+
+            .guidance-condition-detail {
+                color: var(--muted);
+                font-size: 0.72rem;
+                line-height: 1.35;
+                margin-top: 0.18rem;
+            }
+
+            .guidance-card-row {
+                background: #ffffff;
+                border: 1px solid var(--line-soft);
+                border-radius: 14px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+            }
+
+            .guidance-quality-footer {
+                margin-top: 1rem;
+                padding: 0.95rem 1.05rem;
+                background: #ffffff;
+                border: 1.5px solid rgba(11, 94, 168, 0.55);
+                border-left: 4px solid var(--brand);
+                border-radius: 12px;
+                color: var(--text);
+                font-size: 0.86rem;
+                font-weight: 750;
+                line-height: 1.55;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+            }
+
+            .step6-kicker {
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                color: #3a6fb4;
+                margin-bottom: 0.32rem;
+            }
+
+            .step6-heading {
+                font-size: 1.42rem;
+                font-weight: 800;
+                line-height: 1.18;
+                letter-spacing: -0.03em;
+                color: #10263f;
+                margin: 0;
+            }
+
+            .step6-subheading {
+                font-size: 0.92rem;
+                color: #5d7186;
+                line-height: 1.58;
+                margin-top: 0.28rem;
+                max-width: 66rem;
+            }
+
+            .step6-status {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.34rem 0.76rem;
+                border-radius: 999px;
+                border: 1px solid rgba(15, 39, 66, 0.11);
+                background: #f4f7fa;
+                font-size: 0.72rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+            }
+
+            .step6-status.is-hold {
+                color: #9d2b3c;
+                background: #fff5f6;
+                border-color: rgba(157, 43, 60, 0.16);
+            }
+
+            .step6-status.is-internal {
+                color: #0b5ea8;
+                background: #eff5fb;
+                border-color: rgba(11, 94, 168, 0.16);
+            }
+
+            .step6-status.is-preview {
+                color: #42688d;
+                background: #f3f6fa;
+                border-color: rgba(66, 104, 141, 0.12);
+            }
+
+            .step6-status.is-external {
+                color: #136B48;
+                background: #eef8f2;
+                border-color: rgba(19, 107, 72, 0.16);
+            }
+
+            .step6-decision-title {
+                font-size: 1.8rem;
+                font-weight: 820;
+                line-height: 1.08;
+                letter-spacing: -0.04em;
+                color: #10263f;
+                margin-top: 0.74rem;
+            }
+
+            .step6-decision-copy {
+                font-size: 0.97rem;
+                color: #17324d;
+                line-height: 1.62;
+                margin-top: 0.42rem;
+                max-width: 44rem;
+            }
+
+            .step6-detail-list {
+                display: flex;
+                flex-direction: column;
+                margin-top: 1.02rem;
+                border-top: 1px solid rgba(192, 206, 220, 0.42);
+            }
+
+            .step6-detail-row {
+                display: grid;
+                grid-template-columns: 106px minmax(0, 1fr);
+                gap: 0.92rem;
+                padding: 0.78rem 0;
+                border-bottom: 1px solid rgba(192, 206, 220, 0.34);
+            }
+
+            .step6-detail-label {
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #6c8096;
+            }
+
+            .step6-detail-value {
+                font-size: 0.9rem;
+                color: #17324d;
+                line-height: 1.56;
+            }
+
+            .step6-meta-strip {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.52rem;
+                margin-top: 1rem;
+            }
+
+            .step6-meta-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.34rem;
+                padding: 0.4rem 0.7rem;
+                border-radius: 999px;
+                background: #f5f7fa;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #4b6178;
+                font-size: 0.77rem;
+                line-height: 1;
+            }
+
+            .step6-meta-chip strong {
+                font-weight: 780;
+                color: #17324d;
+            }
+
+            .step6-recommendation {
+                height: 100%;
+                background: #fafbfd;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                border-radius: 16px;
+                padding: 1.08rem 1.12rem;
+                box-sizing: border-box;
+            }
+
+            .step6-recommendation-title {
+                font-size: 1.04rem;
+                font-weight: 780;
+                line-height: 1.3;
+                color: #10263f;
+                margin-top: 0.18rem;
+            }
+
+            .step6-recommendation-body {
+                font-size: 0.89rem;
+                color: #17324d;
+                line-height: 1.6;
+                margin-top: 0.4rem;
+            }
+
+            .step6-recommendation-foot {
+                margin-top: 0.88rem;
+                padding-top: 0.76rem;
+                border-top: 1px solid rgba(192, 206, 220, 0.42);
+                font-size: 0.8rem;
+                color: #607285;
+                line-height: 1.46;
+            }
+
+            .step6-caution-card {
+                padding: 0.96rem 1rem;
+                border-radius: 16px;
+                background: linear-gradient(180deg, #f8fbfe 0%, #f3f8fd 100%);
+                border: 1px solid rgba(11, 94, 168, 0.14);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+            }
+
+            .step6-caution-title {
+                font-size: 0.82rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #3a6fb4;
+                margin-bottom: 0.4rem;
+            }
+
+            .step6-caution-copy {
+                color: #17324d;
+                font-size: 0.9rem;
+                line-height: 1.58;
+                font-weight: 650;
+                max-width: 58rem;
+            }
+
+            .step6-center-heading {
+                text-align: center;
+            }
+
+            .step6-center-subheading {
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 36rem;
+            }
+
+            .step6-allowed-list {
+                list-style: none;
+                margin: 0.22rem 0 0 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.62rem;
+            }
+
+            .step6-allowed-list li {
+                display: flex;
+                gap: 0.62rem;
+                align-items: flex-start;
+                font-size: 0.9rem;
+                color: #17324d;
+                line-height: 1.52;
+            }
+
+            .step6-allowed-list li::before {
+                content: "";
+                width: 0.38rem;
+                height: 0.38rem;
+                border-radius: 999px;
+                background: #4b77b8;
+                margin-top: 0.48rem;
+                flex: 0 0 auto;
+            }
+
+            .step6-muted-note {
+                font-size: 0.82rem;
+                color: #607285;
+                line-height: 1.56;
+                margin-top: 0.62rem;
+            }
+
+            .step6-mode-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.78rem;
+                margin-top: 0.9rem;
+            }
+
+            .step6-mode-tile {
+                background: #fbfdff;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                border-radius: 16px;
+                padding: 0.92rem 0.98rem;
+                min-height: 152px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 0.52rem;
+            }
+
+            .step6-mode-tile.is-active {
+                background: #f3f8fe;
+                border-color: rgba(11, 94, 168, 0.3);
+                box-shadow: 0 14px 28px rgba(11, 94, 168, 0.1);
+                transform: translateY(-2px) scale(1.01);
+            }
+
+            .step6-mode-top {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 0.7rem;
+                flex-wrap: wrap;
+            }
+
+            .step6-mode-eyebrow {
+                font-size: 0.67rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #788b9f;
+                margin-bottom: 0.16rem;
+            }
+
+            .step6-mode-name {
+                font-size: 1.04rem;
+                font-weight: 790;
+                letter-spacing: -0.02em;
+                color: #10263f;
+            }
+
+            .step6-mode-state {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.18rem 0.56rem;
+                border-radius: 999px;
+                background: #f2f5f8;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #607285;
+                font-size: 0.63rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+            }
+
+            .step6-mode-state.is-active {
+                background: #eef4fb;
+                border-color: rgba(11, 94, 168, 0.14);
+                color: #0b5ea8;
+            }
+
+            .step6-mode-copy {
+                font-size: 0.89rem;
+                color: #17324d;
+                line-height: 1.58;
+            }
+
+            .step6-mode-points {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.38rem;
+            }
+
+            .step6-mode-points li {
+                display: flex;
+                gap: 0.5rem;
+                align-items: flex-start;
+                color: #27425c;
+                font-size: 0.82rem;
+                line-height: 1.44;
+            }
+
+            .step6-mode-points li::before {
+                content: "";
+                width: 0.32rem;
+                height: 0.32rem;
+                border-radius: 999px;
+                background: rgba(58, 111, 180, 0.72);
+                margin-top: 0.42rem;
+                flex: 0 0 auto;
+            }
+
+            .step6-mode-summary {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.7rem 1.2rem;
+                margin-top: 0.94rem;
+                padding-top: 0.88rem;
+                border-top: 1px solid rgba(192, 206, 220, 0.34);
+                font-size: 0.84rem;
+                color: #607285;
+                line-height: 1.5;
+            }
+
+            .step6-mode-summary strong {
+                color: #17324d;
+                font-weight: 780;
+            }
+
+            .step6-local-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.74rem;
+                margin-top: 0.95rem;
+            }
+
+            .step6-local-card {
+                background: #f9fbfd;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                border-radius: 16px;
+                padding: 0.92rem 0.95rem;
+                min-height: 192px;
+            }
+
+            .step6-local-kicker {
+                color: #6f8297;
+                font-size: 0.7rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.32rem;
+            }
+
+            .step6-local-title {
+                color: #10263f;
+                font-size: 1rem;
+                font-weight: 780;
+                line-height: 1.3;
+                margin-bottom: 0.52rem;
+            }
+
+            .step6-local-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.54rem;
+            }
+
+            .step6-local-list li {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.52rem;
+                color: #27425c;
+                font-size: 0.84rem;
+                line-height: 1.5;
+            }
+
+            .step6-local-list li::before {
+                content: "";
+                width: 0.35rem;
+                height: 0.35rem;
+                border-radius: 999px;
+                background: rgba(58, 111, 180, 0.78);
+                margin-top: 0.42rem;
+                flex: 0 0 auto;
+            }
+
+            .step6-mode-foot {
+                margin-top: auto;
+                padding-top: 0.68rem;
+                border-top: 1px solid rgba(192, 206, 220, 0.34);
+                font-size: 0.78rem;
+                color: #607285;
+                line-height: 1.5;
+            }
+
+            .step6-side-panel {
+                border-left: 1px solid rgba(192, 206, 220, 0.42);
+                padding-left: 1.08rem;
+                min-height: 100%;
+            }
+
+            .step6-prompt-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.62rem;
+                margin-top: 0.72rem;
+            }
+
+            .step6-chat-banner {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.48rem;
+                margin-top: 0.65rem;
+            }
+
+            .step6-chat-pill {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.36rem 0.66rem;
+                border-radius: 999px;
+                background: #f5f7fa;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #4d6178;
+                font-size: 0.74rem;
+                line-height: 1.1;
+            }
+
+            .step6-assistant-note {
+                margin-top: 0.62rem;
+                color: #607285;
+                font-size: 0.84rem;
+                line-height: 1.5;
+            }
+
+            .step6-history-shell {
+                display: flex;
+                flex-direction: column;
+                gap: 0.74rem;
+                margin-top: 0.95rem;
+            }
+
+            .step6-analysis-card {
+                border-radius: 16px;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                padding: 0.9rem 0.95rem;
+                background: #ffffff;
+            }
+
+            .step6-analysis-card.is-query {
+                background: #f8fbfe;
+            }
+
+            .step6-analysis-card.is-answer {
+                background: #fbfdff;
+                border-color: rgba(11, 94, 168, 0.12);
+            }
+
+            .step6-analysis-card-label {
+                color: #6f8297;
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.34rem;
+            }
+
+            .step6-analysis-card-body {
+                color: #17324d;
+                font-size: 0.88rem;
+                line-height: 1.6;
+            }
+
+            .step6-preview-panel {
+                padding: 0.94rem 1rem;
+                border-radius: 14px;
+                background: #f7f9fc;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                margin-top: 0.3rem;
+            }
+
+            .step6-preview-title {
+                font-size: 0.96rem;
+                font-weight: 780;
+                color: #10263f;
+                line-height: 1.34;
+            }
+
+            .step6-preview-copy {
+                margin-top: 0.22rem;
+                font-size: 0.85rem;
+                color: #607285;
+                line-height: 1.5;
+            }
+
+            .step6-section-divider {
+                height: 1px;
+                background: rgba(192, 206, 220, 0.42);
+                margin: 1rem 0 0.9rem;
+            }
+
+            @media (max-width: 980px) {
+                .step6-hero-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .step6-mode-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .step6-local-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 900px) {
+                .guidance-overview-grid,
+                .guidance-readiness-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .guidance-boundary-card {
+                    grid-template-columns: 1fr;
+                }
+
+                .guidance-mode-card {
+                    height: auto;
+                    min-height: 164px;
+                }
+            }
+
             .section-kicker {
                 font-size: 0.8rem;
                 text-transform: uppercase;
@@ -1313,7 +2210,7 @@ def inject_styles() -> None:
             }
 
             .section-shell {
-                background: linear-gradient(180deg, #ffffff 0%, var(--surface-tinted) 100%);
+                background: #ffffff;
                 border: 1.5px solid var(--line);
                 border-radius: 20px;
                 padding: 1.05rem 1.2rem;
@@ -1357,13 +2254,31 @@ def inject_styles() -> None:
             .st-key-metadata_summary_panel,
             .st-key-package_summary_panel,
             .st-key-field_settings_panel,
+            .st-key-field_settings_panel_review,
+            .st-key-field_inspector_body,
+            .st-key-field_inspector_body_review,
             .st-key-generation_strategy_panel,
+            .st-key-generation_strategy_panel_review,
             .st-key-synthetic_preview_panel,
             .st-key-action_bar_panel,
+            .st-key-expected_outcome_panel,
+            .st-key-expected_outcome_panel_review,
             .st-key-submission_summary_panel,
             .st-key-approval_action_panel,
             .st-key-release_summary_panel,
-            .st-key-download_panel {
+            .st-key-download_panel,
+            .st-key-guidance_overview_panel,
+            .st-key-agent_api_key_panel,
+            .st-key-guidance_mode_switch_panel,
+            .st-key-guidance_external_payload_panel,
+            .st-key-guidance_roles_panel,
+            .st-key-guidance_next_steps_panel,
+            .st-key-guidance_chat_panel,
+            .st-key-guidance_actions_panel,
+            .st-key-handoff_decision_panel,
+            .st-key-handoff_outputs_panel,
+            .st-key-handoff_explanation_panel,
+            .st-key-handoff_actions_panel {
                 background: var(--surface) !important;
                 border: 1px solid var(--line) !important;
                 border-radius: 20px !important;
@@ -1395,6 +2310,153 @@ def inject_styles() -> None:
                 padding-bottom: 1.1rem !important;
             }
 
+            .st-key-guidance_overview_panel {
+                padding-bottom: 1.35rem !important;
+            }
+
+            .st-key-guidance_mode_switch_panel [data-testid="column"] [data-testid="stVerticalBlock"] {
+                gap: 0 !important;
+            }
+
+            .st-key-guidance_switch_internal,
+            .st-key-guidance_switch_external {
+                margin-top: 0 !important;
+            }
+
+            .st-key-guidance_switch_internal button,
+            .st-key-guidance_switch_external button {
+                min-height: 3.25rem !important;
+                margin-top: 0 !important;
+                border-top: 0 !important;
+                border-radius: 0 0 16px 16px !important;
+                color: #ffffff !important;
+                font-size: 0.92rem !important;
+                font-weight: 800 !important;
+            }
+
+            .st-key-guidance_switch_internal button {
+                background: var(--brand) !important;
+                border: 1.5px solid var(--brand) !important;
+                box-shadow: 0 10px 22px rgba(11, 94, 168, 0.16) !important;
+            }
+
+            .st-key-guidance_switch_external button {
+                background: #136B48 !important;
+                border: 1.5px solid #136B48 !important;
+                box-shadow: 0 10px 22px rgba(19, 107, 72, 0.18) !important;
+            }
+
+            .st-key-guidance_switch_internal button:hover,
+            .st-key-guidance_demo_unlock button:hover {
+                background: var(--brand-deep) !important;
+                border-color: var(--brand-deep) !important;
+                color: #ffffff !important;
+            }
+
+            .st-key-guidance_switch_external button:hover {
+                background: #0f573b !important;
+                border-color: #0f573b !important;
+                color: #ffffff !important;
+            }
+
+            .st-key-guidance_demo_unlock button {
+                min-height: 3rem !important;
+                background: var(--brand) !important;
+                border: 1.5px solid var(--brand-deep) !important;
+                border-radius: 14px !important;
+                color: #ffffff !important;
+                font-weight: 800 !important;
+                box-shadow: 0 10px 22px rgba(11, 94, 168, 0.18) !important;
+            }
+
+            .st-key-step6_hero_shell,
+            .st-key-step6_mode_shell,
+            .st-key-step6_agent_shell,
+            .st-key-step6_actions_shell {
+                background: #ffffff !important;
+                border: 1px solid rgba(15, 39, 66, 0.08) !important;
+                border-radius: 20px !important;
+                box-shadow: 0 14px 34px rgba(15, 39, 66, 0.04) !important;
+                padding: 1.06rem 1.2rem !important;
+            }
+
+            .st-key-step6_hero_shell {
+                padding: 1.12rem 1.22rem !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stButton"] button {
+                min-height: 3rem !important;
+                border-radius: 14px !important;
+                border: 1px solid rgba(15, 39, 66, 0.1) !important;
+                background: #ffffff !important;
+                color: #17324d !important;
+                box-shadow: none !important;
+                font-weight: 700 !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stButton"] button:hover {
+                border-color: rgba(11, 94, 168, 0.26) !important;
+                color: #0b5ea8 !important;
+                background: #f7f9fc !important;
+            }
+
+            .st-key-step6_mode_shell [data-testid="stButton"] button {
+                min-height: 3rem !important;
+                border-radius: 999px !important;
+                font-size: 0.92rem !important;
+                font-weight: 760 !important;
+                border: 1px solid rgba(15, 39, 66, 0.1) !important;
+                background: #ffffff !important;
+                color: #17324d !important;
+                box-shadow: none !important;
+            }
+
+            .st-key-step6_mode_shell [data-testid="stButton"] button:hover {
+                border-color: rgba(11, 94, 168, 0.22) !important;
+                color: #0b5ea8 !important;
+                background: #f7f9fc !important;
+            }
+
+            .st-key-step6_mode_shell [data-testid="stButton"] button[kind="primary"] {
+                background: var(--brand) !important;
+                border: 1px solid var(--brand) !important;
+                color: #ffffff !important;
+                box-shadow: 0 10px 22px rgba(11, 94, 168, 0.16) !important;
+                transform: translateY(-1px);
+            }
+
+            .st-key-step6_mode_shell [data-testid="stButton"] button[kind="primary"]:hover {
+                background: var(--brand-deep) !important;
+                border-color: var(--brand-deep) !important;
+                color: #ffffff !important;
+            }
+
+            .st-key-step6_mode_shell [data-testid="stButton"] button:disabled {
+                opacity: 1 !important;
+                background: #f3f6fa !important;
+                border-color: rgba(15, 39, 66, 0.08) !important;
+                color: #6f8297 !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stChatInput"] {
+                border-radius: 16px !important;
+                border: 1px solid rgba(15, 39, 66, 0.1) !important;
+                background: #f7f9fc !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stTextArea"] textarea {
+                min-height: 120px !important;
+                border-radius: 16px !important;
+                border: 1px solid rgba(15, 39, 66, 0.1) !important;
+                background: #f7f9fc !important;
+                color: #17324d !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stChatInput"] textarea,
+            .st-key-step6_agent_shell [data-testid="stChatInput"] input {
+                color: #17324d !important;
+            }
+
             .st-key-field_distributions_panel {
                 padding-bottom: 1.2rem !important;
             }
@@ -1407,12 +2469,34 @@ def inject_styles() -> None:
             }
 
             .st-key-field_settings_panel,
+            .st-key-field_settings_panel_review,
+            .st-key-field_inspector_body,
+            .st-key-field_inspector_body_review,
             .st-key-generation_strategy_panel,
+            .st-key-generation_strategy_panel_review,
             .st-key-synthetic_preview_panel,
             .st-key-action_bar_panel,
+            .st-key-expected_outcome_panel,
+            .st-key-expected_outcome_panel_review,
             .st-key-approval_action_panel,
-            .st-key-download_panel {
+            .st-key-download_panel,
+            .st-key-guidance_overview_panel,
+            .st-key-agent_api_key_panel,
+            .st-key-guidance_mode_switch_panel,
+            .st-key-guidance_external_payload_panel,
+            .st-key-guidance_roles_panel,
+            .st-key-guidance_next_steps_panel,
+            .st-key-guidance_chat_panel,
+            .st-key-guidance_actions_panel,
+            .st-key-handoff_decision_panel,
+            .st-key-handoff_outputs_panel,
+            .st-key-handoff_explanation_panel,
+            .st-key-handoff_actions_panel {
                 padding-bottom: 1.1rem !important;
+            }
+
+            .st-key-guidance_overview_panel {
+                padding-bottom: 1.35rem !important;
             }
 
             .st-key-request_details_panel > div,
@@ -1426,13 +2510,31 @@ def inject_styles() -> None:
             .st-key-metadata_summary_panel > div,
             .st-key-package_summary_panel > div,
             .st-key-field_settings_panel > div,
+            .st-key-field_settings_panel_review > div,
+            .st-key-field_inspector_body > div,
+            .st-key-field_inspector_body_review > div,
             .st-key-generation_strategy_panel > div,
+            .st-key-generation_strategy_panel_review > div,
             .st-key-synthetic_preview_panel > div,
             .st-key-action_bar_panel > div,
+            .st-key-expected_outcome_panel > div,
+            .st-key-expected_outcome_panel_review > div,
             .st-key-submission_summary_panel > div,
             .st-key-approval_action_panel > div,
             .st-key-release_summary_panel > div,
-            .st-key-download_panel > div {
+            .st-key-download_panel > div,
+            .st-key-guidance_overview_panel > div,
+            .st-key-agent_api_key_panel > div,
+            .st-key-guidance_mode_switch_panel > div,
+            .st-key-guidance_external_payload_panel > div,
+            .st-key-guidance_roles_panel > div,
+            .st-key-guidance_next_steps_panel > div,
+            .st-key-guidance_chat_panel > div,
+            .st-key-guidance_actions_panel > div,
+            .st-key-handoff_decision_panel > div,
+            .st-key-handoff_outputs_panel > div,
+            .st-key-handoff_explanation_panel > div,
+            .st-key-handoff_actions_panel > div {
                 background: transparent !important;
             }
 
@@ -1830,12 +2932,20 @@ def inject_styles() -> None:
 
             div[data-testid="stDataFrame"],
             div[data-testid="stTable"] {
-                background: var(--surface) !important;
-                border-radius: 18px;
+                background: #ffffff !important;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 3px rgba(8,70,125,0.06);
+            }
+            /* DataFrame header row: deeper tint so column headers stand out */
+            div[data-testid="stDataFrame"] thead tr th,
+            div[data-testid="stTable"] thead tr th {
+                background: #eaf1f8 !important;
+                font-weight: 700 !important;
             }
 
             div[data-testid="stVerticalBlockBorderWrapper"] {
-                background: linear-gradient(180deg, #ffffff 0%, var(--surface-tinted) 100%) !important;
+                background: #ffffff !important;
                 border: 1.5px solid var(--line) !important;
                 border-radius: 18px;
                 box-shadow: var(--shadow), var(--shadow-inset);
@@ -1872,6 +2982,33 @@ def inject_styles() -> None:
             div[data-testid="stDataFrame"] *,
             div[data-testid="stTable"] * {
                 color: var(--text) !important;
+            }
+
+            div[data-testid="stExpander"] {
+                background: #ffffff !important;
+                border: 1.5px solid var(--line) !important;
+                border-radius: 18px !important;
+                box-shadow: var(--shadow), var(--shadow-inset) !important;
+                overflow: hidden !important;
+            }
+
+            div[data-testid="stExpander"] details,
+            div[data-testid="stExpander"] summary,
+            div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+                background: #ffffff !important;
+            }
+
+            div[data-testid="stExpander"] summary {
+                border-bottom: 1px solid var(--line-soft) !important;
+            }
+
+            div[data-testid="stExpander"] summary p {
+                color: var(--text) !important;
+                font-weight: 700 !important;
+            }
+
+            div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+                border-top: 0 !important;
             }
 
             .control-card-kicker {
@@ -2109,6 +3246,17 @@ def initialize_app_state() -> None:
         "pending_active_request_selector": None,
         "pending_queue_clear": False,
         "next_request_number": 1,
+        # Agent Guidance & Handoff (Step 6) state
+        "guidance_mode": "internal",
+        "external_summary_approval_status": "Not requested",
+        "external_summary_approval_requested_by": None,
+        "external_summary_approval_requested_at": None,
+        "external_summary_approval_reviewer": None,
+        "external_summary_approval_at": None,
+        "handoff_internal_sent_at": None,
+        "handoff_internal_sent_by": None,
+        "agent_chat_history": [],
+        "agent_api_key": "",
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -3031,7 +4179,9 @@ def current_workflow_stage(metadata: list[dict[str, Any]], controls: dict[str, A
         return 1
     if st.session_state.metadata_status != "Approved" or has_unsubmitted_metadata_changes(metadata):
         return 2 if st.session_state.metadata_status != "In Review" else 3
-    return 4
+    if not st.session_state.results_shared_at:
+        return 4
+    return 5
 
 
 def build_progress_tracker_rows(metadata: list[dict[str, Any]], controls: dict[str, Any]) -> list[dict[str, str]]:
@@ -3090,6 +4240,7 @@ def build_primary_action(metadata: list[dict[str, Any]], controls: dict[str, Any
         2: "Configure & Generate",
         3: "Review Submitted Package" if st.session_state.current_role == "Manager / Reviewer" else "Awaiting Reviewer",
         4: "Download Synthetic Package",
+        5: "Run Governed Handoff",
     }
     note_map = {
         0: "Add request details, upload a CSV, and submit when the request is ready.",
@@ -3097,6 +4248,7 @@ def build_primary_action(metadata: list[dict[str, Any]], controls: dict[str, Any
         2: "Configure metadata, generate a synthetic preview, and submit the package for reviewer sign-off.",
         3: "Reviewer inspects the generated preview and metadata config before approving release.",
         4: "Download the approved synthetic package and record the release for audit.",
+        5: "Agent decides whether the package stays internal, is held for review, or supports external assistance.",
     }
     return {
         "step": action_step,
@@ -3636,7 +4788,7 @@ def build_operating_state_cards(metadata: list[dict[str, Any]], controls: dict[s
 
 def step_status_labels(metadata: list[dict[str, Any]], controls: dict[str, Any]) -> list[str]:
     if not has_active_dataset():
-        return ["Upload needed", "Locked", "Locked", "Locked", "Locked"]
+        return ["Upload needed", "Locked", "Locked", "Locked", "Locked", "Locked"]
 
     # Step 2 label: configure + generate state
     if st.session_state.metadata_status == "In Review":
@@ -3668,12 +4820,22 @@ def step_status_labels(metadata: list[dict[str, Any]], controls: dict[str, Any])
     else:
         release_label = "Locked"
 
+    # Step 5 label: agent guidance mode
+    guidance_mode = st.session_state.get("guidance_mode", "internal")
+    if not st.session_state.results_shared_at:
+        handoff_label = "Locked"
+    elif guidance_mode == "external":
+        handoff_label = "External assist"
+    else:
+        handoff_label = "Internal guidance"
+
     return [
         "Uploaded" if st.session_state.intake_confirmed else "Action needed",
         "Reviewed" if st.session_state.hygiene_reviewed else "Ready",
         configure_label,
         manager_label,
         release_label,
+        handoff_label,
     ]
 
 
@@ -3687,7 +4849,9 @@ def max_unlocked_step(metadata: list[dict[str, Any]], controls: dict[str, Any]) 
     if st.session_state.metadata_status != "Approved" or has_unsubmitted_metadata_changes(metadata):
         # Analyst on step 2 (configure+generate+submit); manager on step 3 (review+approve)
         return 3 if st.session_state.metadata_status == "In Review" else 2
-    return 4  # Release
+    if not st.session_state.results_shared_at:
+        return 4  # Release
+    return 5  # Governed Handoff
 
 
 def default_step_for_role(metadata: list[dict[str, Any]], controls: dict[str, Any], role: str | None = None) -> int:
@@ -3700,6 +4864,8 @@ def default_step_for_role(metadata: list[dict[str, Any]], controls: dict[str, An
     if active_role == "Manager / Reviewer":
         if st.session_state.metadata_status == "In Review":
             return 3  # Manager Review & Approve page
+        if st.session_state.results_shared_at:
+            return 5  # Governed Handoff page (post-release)
         if st.session_state.synthetic_df is not None and st.session_state.metadata_status == "Approved":
             return 4  # Release page
         return visible_steps[0]
@@ -3711,7 +4877,9 @@ def default_step_for_role(metadata: list[dict[str, Any]], controls: dict[str, An
             return 1
         if st.session_state.metadata_status != "Approved" or has_unsubmitted_metadata_changes(metadata):
             return 2  # Configure & Generate
-        return 4  # Release (approved)
+        if not st.session_state.results_shared_at:
+            return 4  # Release (approved, not yet released)
+        return 5  # Governed Handoff (post-release)
 
     unlocked = max_unlocked_step(metadata, controls)
     for step_index in visible_steps:
@@ -3736,6 +4904,86 @@ def quick_sign_in(role: str) -> None:
     metadata = editor_frame_to_metadata(st.session_state.metadata_editor_df)
     controls = st.session_state.controls
     st.session_state.current_step = default_step_for_role(metadata, controls, role)
+    st.rerun()
+
+
+def demo_jump_to_step_six(role: str = "Data Analyst") -> None:
+    """DEMO BACKDOOR — login + run the full pipeline on sample_data.csv +
+    set all governance flags + jump straight to Step 6 (Agent Guidance).
+
+    Remove this function and its callers before production.
+    """
+    email_stub = "analyst" if role == "Data Analyst" else "reviewer"
+    st.session_state.authenticated = True
+    st.session_state.current_role = role
+    st.session_state.current_user_email = f"{email_stub}@southlake.ca"
+
+    if not st.session_state.get("request_registry"):
+        create_blank_request("Demo preload · sample_data.csv")
+    df = pd.read_csv(SAMPLE_DATA_PATH).replace(r"^\s*$", pd.NA, regex=True)
+    set_source_dataframe(df, "Demo preload · sample_data.csv")
+
+    # Run full pipeline
+    metadata = editor_frame_to_metadata(st.session_state.metadata_editor_df)
+    controls = st.session_state.controls
+    try:
+        synthetic_df, gen_summary = generate_synthetic_advanced(
+            st.session_state.source_df, metadata, controls,
+        )
+        validation = validate_synthetic_data(
+            st.session_state.source_df, synthetic_df, metadata, controls,
+        )
+    except Exception as exc:
+        st.error(f"Demo preload failed during generation: {exc}")
+        return
+
+    st.session_state.synthetic_df = synthetic_df
+    st.session_state.generation_summary = gen_summary
+    st.session_state.validation = validation
+    st.session_state.last_generation_signature = build_generation_signature(metadata, controls)
+    st.session_state.release_status = "Released"
+
+    # Governance flags — all gates pass
+    st.session_state.intake_confirmed = True
+    st.session_state.hygiene_reviewed = True
+    st.session_state.settings_reviewed = True
+    st.session_state.settings_review_signature = build_metadata_signature(metadata)
+    st.session_state.metadata_status = "Approved"
+    ts = format_timestamp()
+    st.session_state.metadata_submitted_by = "Data Analyst (demo)"
+    st.session_state.metadata_submitted_at = ts
+    st.session_state.metadata_approved_by = "Manager / Reviewer (demo)"
+    st.session_state.metadata_approved_at = ts
+    st.session_state.metadata_reviewed_by = "Manager / Reviewer (demo)"
+    st.session_state.metadata_reviewed_at = ts
+    st.session_state.last_reviewed_metadata_signature = build_metadata_signature(metadata)
+
+    try:
+        register_metadata_submission(metadata)
+        register_metadata_approval(metadata)
+    except Exception:
+        pass
+
+    # Release recorded
+    st.session_state.results_shared_at = ts
+    st.session_state.results_shared_by = role
+
+    # External approval pre-approved so External API assist is unlocked
+    st.session_state.external_summary_approval_status = "Approved"
+    st.session_state.external_summary_approval_requested_by = "Data Analyst (demo)"
+    st.session_state.external_summary_approval_requested_at = ts
+    st.session_state.external_summary_approval_reviewer = "Manager / Reviewer (demo)"
+    st.session_state.external_summary_approval_at = ts
+    st.session_state.guidance_mode = "external"
+
+    # Jump to Step 6
+    st.session_state.current_step = 5
+
+    record_audit_event(
+        "DEMO BACKDOOR · preloaded Step 6",
+        "Pipeline ran on sample_data.csv; governance flags simulated; jumped to Agent Guidance.",
+        status="Completed",
+    )
     st.rerun()
 
 
@@ -4106,6 +5354,28 @@ def render_login_screen() -> None:
         if st.button("Manager / Reviewer", use_container_width=True, key="login_demo_manager"):
             quick_sign_in("Manager / Reviewer")
 
+        # ── DEMO BACKDOOR ─────────────────────────────────────
+        # Remove this block before production. One-click preload that logs in,
+        # runs the full synthetic pipeline on sample_data.csv, and jumps
+        # straight to Step 6 (Agent Guidance).
+        st.markdown(
+            '<div style="margin-top:0.85rem;padding-top:0.85rem;'
+            'border-top:1px dashed #CBD5E1;">'
+            '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#9C6A17;margin-bottom:0.35rem;">Demo shortcut</div>'
+            '<div style="font-size:0.82rem;color:#475569;line-height:1.5;margin-bottom:0.55rem;">'
+            'Skip Steps 0–4. Preloads <code>sample_data.csv</code>, runs the pipeline, '
+            'approves the package, records a release, and lands on Step 6 — Agent Guidance.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        if st.button(
+            "Jump to Step 6 (demo)",
+            use_container_width=True,
+            key="login_demo_jump_step6",
+            help="Preload everything and land directly on Agent Guidance & Handoff.",
+        ):
+            demo_jump_to_step_six("Data Analyst")
+
         st.markdown(
             """
             </div>
@@ -4127,6 +5397,81 @@ def render_login_screen() -> None:
         </div>
         """,
         unsafe_allow_html=True,
+    )
+    clear_authenticated_view_artifacts_for_login()
+
+
+def clear_authenticated_view_artifacts_for_login() -> None:
+    st_components.html(
+        """
+        <script>
+            (function() {
+                const doc = window.parent && window.parent.document ? window.parent.document : document;
+                const staleSelectors = [
+                    '.topbar-shell',
+                    '.summary-grid',
+                    '.workflow-progress',
+                    '.section-shell',
+                    '[class*="st-key-step_body_"]',
+                    '.st-key-request_details_panel',
+                    '.st-key-upload_task_panel',
+                    '.st-key-submission_readiness_panel',
+                    '.st-key-intake_summary_panel',
+                    '.st-key-dataset_shape_panel',
+                    '.st-key-data_preview_panel',
+                    '.st-key-missing_heatmap_panel',
+                    '.st-key-field_distributions_panel',
+                    '.st-key-metadata_summary_panel',
+                    '.st-key-package_summary_panel',
+                    '.st-key-field_settings_panel',
+                    '.st-key-field_settings_panel_review',
+                    '.st-key-generation_strategy_panel',
+                    '.st-key-generation_strategy_panel_review',
+                    '.st-key-synthetic_preview_panel',
+                    '.st-key-expected_outcome_panel',
+                    '.st-key-expected_outcome_panel_review',
+                    '.st-key-action_bar_panel',
+                    '.st-key-submission_summary_panel',
+                    '.st-key-approval_action_panel',
+                    '.st-key-release_summary_panel',
+                    '.st-key-download_panel',
+                    '.st-key-guidance_overview_panel',
+                    '.st-key-agent_api_key_panel',
+                    '.st-key-guidance_mode_switch_panel',
+                    '.st-key-guidance_external_payload_panel',
+                    '.st-key-guidance_roles_panel',
+                    '.st-key-guidance_next_steps_panel',
+                    '.st-key-guidance_chat_panel',
+                    '.st-key-guidance_actions_panel',
+                    '.st-key-handoff_decision_panel',
+                    '.st-key-handoff_outputs_panel',
+                    '.st-key-handoff_explanation_panel',
+                    '.st-key-handoff_actions_panel'
+                ];
+                const isLoginMounted = () => (
+                    doc.querySelector('.login-left-panel') ||
+                    doc.querySelector('.login-form-title')
+                );
+                const removeStaleAuthenticatedContent = () => {
+                    if (!isLoginMounted()) return false;
+                    staleSelectors.forEach((selector) => {
+                        try {
+                            doc.querySelectorAll(selector).forEach((el) => el.remove());
+                        } catch (e) {}
+                    });
+                    return true;
+                };
+                removeStaleAuthenticatedContent();
+                let ticks = 0;
+                const iv = setInterval(() => {
+                    if (!removeStaleAuthenticatedContent() || ++ticks >= 30) {
+                        clearInterval(iv);
+                    }
+                }, 60);
+            })();
+        </script>
+        """,
+        height=0,
     )
 
 
@@ -4261,6 +5606,31 @@ def render_step_navigation(metadata: list[dict[str, Any]], controls: dict[str, A
     st.markdown(f"<div class='workflow-progress'>{progress_html}</div>", unsafe_allow_html=True)
 
 
+def clear_stale_step_artifacts(current_step: int) -> None:
+    if current_step == 1:
+        return
+    st_components.html(
+        """
+        <script>
+            (function() {
+                const doc = window.parent && window.parent.document ? window.parent.document : document;
+                const removeStalePanels = () => {
+                    try {
+                        if (doc.querySelector('.st-key-step_body_1')) return;
+                        doc.querySelectorAll('.st-key-field_distributions_panel').forEach((el) => el.remove());
+                    } catch (e) {}
+                };
+                removeStalePanels();
+                setTimeout(removeStalePanels, 60);
+                setTimeout(removeStalePanels, 180);
+                setTimeout(removeStalePanels, 420);
+            })();
+        </script>
+        """,
+        height=0,
+    )
+
+
 def render_section_header(step_index: int, checkpoint: str) -> None:
     step = STEP_CONFIG[step_index]
     st.markdown(
@@ -4316,7 +5686,7 @@ def render_step_one(metadata: list[dict[str, Any]]) -> None:
     # ─────────────────────────────────────────────────────────────
     st.markdown(
         f"""
-        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.8rem 1.15rem;background:#ffffff;border:1px solid #d6e2ec;border-radius:20px;box-shadow:0 10px 24px rgba(8,70,125,0.08);margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.85rem 1.2rem;background:#ffffff;border:1.5px solid #b8c9da;border-radius:20px;box-shadow:0 2px 4px rgba(8,70,125,0.05), 0 14px 32px rgba(8,70,125,0.12), inset 0 1px 0 rgba(255,255,255,0.75);margin-bottom:1rem;flex-wrap:wrap;position:relative;">
             <div style="display:flex;align-items:baseline;gap:0.45rem;">
                 <span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#0b5ea8;font-weight:700;">Request</span>
                 <span style="font-size:0.9rem;color:#17324d;font-weight:600;font-family:ui-monospace,monospace;">{active_request}</span>
@@ -4592,7 +5962,7 @@ def render_step_two() -> None:
 
     st.markdown(
         f"""
-        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.8rem 1.15rem;background:#ffffff;border:1px solid #d6e2ec;border-radius:20px;box-shadow:0 10px 24px rgba(8,70,125,0.08);margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.85rem 1.2rem;background:#ffffff;border:1.5px solid #b8c9da;border-radius:20px;box-shadow:0 2px 4px rgba(8,70,125,0.05), 0 14px 32px rgba(8,70,125,0.12), inset 0 1px 0 rgba(255,255,255,0.75);margin-bottom:1rem;flex-wrap:wrap;position:relative;">
             <div style="display:flex;align-items:baseline;gap:0.45rem;">
                 <span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#0b5ea8;font-weight:700;">Request</span>
                 <span style="font-size:0.9rem;color:#17324d;font-weight:600;font-family:ui-monospace,monospace;">{active_request}</span>
@@ -4899,7 +6269,7 @@ def _render_status_strip_v2(step_index: int, status_label: str, status_color: st
     active_request = st.session_state.active_request_id or "Not yet created"
     st.markdown(
         f"""
-        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.8rem 1.15rem;background:#ffffff;border:1px solid #d6e2ec;border-radius:20px;box-shadow:0 10px 24px rgba(8,70,125,0.08);margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:1.2rem;padding:0.85rem 1.2rem;background:#ffffff;border:1.5px solid #b8c9da;border-radius:20px;box-shadow:0 2px 4px rgba(8,70,125,0.05), 0 14px 32px rgba(8,70,125,0.12), inset 0 1px 0 rgba(255,255,255,0.75);margin-bottom:1rem;flex-wrap:wrap;position:relative;">
             <div style="display:flex;align-items:baseline;gap:0.45rem;">
                 <span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#0b5ea8;font-weight:700;">Request</span>
                 <span style="font-size:0.9rem;color:#17324d;font-weight:600;font-family:ui-monospace,monospace;">{active_request}</span>
@@ -4926,11 +6296,12 @@ def _render_status_strip_v2(step_index: int, status_label: str, status_color: st
 
 def _stat_capsule_v2(kicker: str, value: str, detail: str, accent: str = "#0b5ea8", bg: str = "#f5f9fc") -> str:
     return (
-        f'<div style="flex:1;min-width:140px;padding:0.85rem 1rem;background:{bg};'
-        f'border:1px solid #d6e2ec;border-radius:12px;margin-bottom:0.25rem;">'
-        f'<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:{accent};margin-bottom:0.25rem;">{kicker}</div>'
-        f'<div style="font-size:1.4rem;font-weight:700;color:#17324d;line-height:1.15;">{value}</div>'
-        f'<div style="font-size:0.76rem;color:#668097;margin-top:0.2rem;line-height:1.35;">{detail}</div>'
+        f'<div style="flex:1;min-width:140px;padding:0.9rem 1.05rem;background:{bg};'
+        f'border:1.5px solid {accent}33;border-radius:12px;margin-bottom:0.25rem;'
+        f'box-shadow:inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 3px rgba(8,70,125,0.06);">'
+        f'<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:{accent};margin-bottom:0.25rem;">{kicker}</div>'
+        f'<div style="font-size:1.45rem;font-weight:800;color:#0f2742;line-height:1.15;letter-spacing:-0.01em;">{value}</div>'
+        f'<div style="font-size:0.76rem;color:#5b7893;margin-top:0.2rem;line-height:1.35;">{detail}</div>'
         f'</div>'
     )
 
@@ -5029,23 +6400,21 @@ def _render_expected_outcome_card(controls: dict[str, Any], metadata: list[dict[
         "neutral": ("#475569", "#F1F5F9"),
     }
     items_html = ""
-    for label, value, tone in rows:
+    for idx, (label, value, tone) in enumerate(rows):
         color, bg = tone_styles.get(tone, tone_styles["neutral"])
         items_html += (
-            f'<div style="display:flex;align-items:center;gap:0.7rem;padding:0.55rem 0.75rem;'
-            f'background:#ffffff;border:1px solid #d6e2ec;border-radius:10px;margin-bottom:0.4rem;">'
-            f'<div style="flex:0 0 180px;font-size:0.8rem;color:#475569;font-weight:600;">{label}</div>'
-            f'<div style="flex:1;display:inline-flex;align-items:center;gap:0.4rem;padding:0.18rem 0.55rem;'
-            f'background:{bg};border-radius:999px;width:fit-content;">'
-            f'<span style="width:6px;height:6px;border-radius:50%;background:{color};"></span>'
-            f'<span style="font-size:0.82rem;color:{color};font-weight:700;">{value}</span>'
+            f'<div class="expected-outcome-row" style="--tone-color:{color};--tone-bg:{bg};--tone-border:{color}33;">'
+            f'<div class="expected-outcome-label">{html.escape(label)}</div>'
+            f'<div class="expected-outcome-badge">'
+            f'<span class="expected-outcome-dot"></span>'
+            f'<span>{html.escape(value)}</span>'
             f'</div></div>'
         )
     st.markdown(
         '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0b5ea8;margin-bottom:0.3rem;">Expected outcome</div>'
         '<div style="font-size:1.1rem;font-weight:600;color:#17324d;margin-bottom:0.1rem;line-height:1.3;">Agent forecast from the current configuration</div>'
-        '<div style="font-size:0.82rem;color:#668097;margin-bottom:0.75rem;line-height:1.5;">Updates live as you change metadata actions or algorithm controls. Click Generate to confirm with real metrics.</div>'
-        + items_html,
+        '<div style="font-size:0.82rem;color:#668097;line-height:1.5;">Updates live as you change metadata actions or algorithm controls. Click Generate to confirm with real metrics.</div>'
+        f'<div class="expected-outcome-list">{items_html}</div>',
         unsafe_allow_html=True,
     )
 
@@ -5245,9 +6614,9 @@ def _render_field_detail_panel(
         f'<span style="padding:0.15rem 0.55rem;background:{"#EDF9F3" if item.get("include") else "#F1F5F9"};border-radius:999px;font-size:0.76rem;color:{"#136B48" if item.get("include") else "#668097"};font-weight:600;">{"Included" if item.get("include") else "Excluded"}</span>'
         f'</div>'
         f'<div style="display:flex;gap:0.5rem;margin-bottom:0.7rem;flex-wrap:wrap;">'
-        f'<div style="padding:0.45rem 0.7rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:8px;font-size:0.78rem;color:#475569;">'
+        f'<div style="padding:0.45rem 0.7rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:8px;font-size:0.78rem;color:#475569;">'
         f'<span style="color:#0b5ea8;font-weight:700;">Privacy handling:</span> {action}</div>'
-        f'<div style="padding:0.45rem 0.7rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:8px;font-size:0.78rem;color:#475569;">'
+        f'<div style="padding:0.45rem 0.7rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:8px;font-size:0.78rem;color:#475569;">'
         f'<span style="color:#0b5ea8;font-weight:700;">Generation method:</span> {method}</div>'
         f'</div>',
         unsafe_allow_html=True,
@@ -5438,7 +6807,7 @@ def _render_preview_panel(metadata, controls, read_only=False):
         constraints_list = summary.get("detected_constraints", [])
         repairs = summary.get("constraint_repairs", [])
 
-        algo_html = '<div style="display:flex;gap:1.2rem;padding:0.7rem 0.9rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:10px;margin-bottom:0.8rem;font-size:0.82rem;flex-wrap:wrap;">'
+        algo_html = '<div style="display:flex;gap:1.2rem;padding:0.7rem 0.9rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:10px;margin-bottom:0.8rem;font-size:0.82rem;flex-wrap:wrap;">'
         algo_html += f'<div><span style="font-weight:700;color:#0b5ea8;">Algorithm:</span> Gaussian Copula ({len(copula_cols)} fields), DP Laplace (epsilon = {summary.get("privacy_epsilon", "n/a")})</div>'
         if constraints_list:
             algo_html += f'<div><span style="font-weight:700;color:#0b5ea8;">Constraints detected:</span> {len(constraints_list)}</div>'
@@ -5731,7 +7100,7 @@ def render_step_three() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             active_desc = GENERATION_PRESETS.get(active_profile, {}).get("description",
                 "Custom configuration. Fine-tune controls below.")
             st.markdown(
-                f'<div style="padding:0.55rem 0.8rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:10px;margin-bottom:0.9rem;font-size:0.82rem;color:#475569;line-height:1.5;">'
+                f'<div style="padding:0.55rem 0.8rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:10px;margin-bottom:0.9rem;font-size:0.82rem;color:#475569;line-height:1.5;">'
                 f'<span style="color:#0b5ea8;font-weight:700;">Active · {active_profile}</span> &nbsp;{active_desc}</div>',
                 unsafe_allow_html=True,
             )
@@ -5830,7 +7199,7 @@ def render_step_three() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             st.markdown('<div style="font-size:0.88rem;color:#475569;line-height:1.8;">' + '<br/>'.join(ro_rows) + '</div>',
                         unsafe_allow_html=True)
             st.markdown(
-                f'<div style="margin-top:0.6rem;padding:0.55rem 0.8rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:10px;font-size:0.82rem;color:#475569;line-height:1.5;">{profile_desc}</div>',
+                f'<div style="margin-top:0.6rem;padding:0.55rem 0.8rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:10px;font-size:0.82rem;color:#475569;line-height:1.5;">{profile_desc}</div>',
                 unsafe_allow_html=True,
             )
 
@@ -6078,7 +7447,7 @@ def render_step_four(metadata: list[dict[str, Any]], controls: dict[str, Any]) -
         st.markdown('<div style="font-size:0.88rem;color:#475569;line-height:1.8;">' + '<br/>'.join(ro_rows) + '</div>',
                     unsafe_allow_html=True)
         st.markdown(
-            f'<div style="margin-top:0.6rem;padding:0.55rem 0.8rem;background:#F8FAFC;border:1px solid #E5EDF5;border-radius:10px;font-size:0.82rem;color:#475569;line-height:1.5;">{profile_desc}</div>',
+            f'<div style="margin-top:0.6rem;padding:0.55rem 0.8rem;background:linear-gradient(180deg,#eef3f9 0%,#f3f7fb 100%);border:1px solid #c8d6e3;box-shadow:inset 0 1px 2px rgba(8,70,125,0.05);border-radius:10px;font-size:0.82rem;color:#475569;line-height:1.5;">{profile_desc}</div>',
             unsafe_allow_html=True,
         )
 
@@ -6166,6 +7535,1303 @@ def render_step_four(metadata: list[dict[str, Any]], controls: dict[str, Any]) -
             rerun_with_persist()
 
     return metadata, controls
+
+
+# ═══════════════════════════════════════════════════════════════════
+# GOVERNED HANDOFF — decision gate (Step 6, index 5)
+# ═══════════════════════════════════════════════════════════════════
+
+def build_handoff_conditions(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Evaluate the 8 policy conditions that drive the handoff mode.
+
+    Each returns: { label, passed (bool), detail }
+    """
+    validation = st.session_state.get("validation") or {}
+    hygiene = st.session_state.get("hygiene") or {}
+    overall_score = float(validation.get("overall_score", 0))
+    privacy_score = float(validation.get("privacy_score", 0))
+    hygiene_high = int((hygiene.get("severity_counts") or {}).get("High", 0))
+    approval_status = str(st.session_state.get("external_summary_approval_status", "Not requested"))
+
+    conds: list[dict[str, Any]] = [
+        {
+            "key": "approved",
+            "label": "Package approved by reviewer",
+            "passed": st.session_state.metadata_status == "Approved",
+            "detail": f"Metadata status: {st.session_state.metadata_status}",
+        },
+        {
+            "key": "released",
+            "label": "Release recorded in audit log",
+            "passed": bool(st.session_state.results_shared_at),
+            "detail": (f"Released at {st.session_state.results_shared_at}"
+                       if st.session_state.results_shared_at else "Not yet released"),
+        },
+        {
+            "key": "preview_ready",
+            "label": "Synthetic preview + quality metrics available",
+            "passed": st.session_state.get("synthetic_df") is not None and bool(validation),
+            "detail": (f"Overall quality {overall_score:.1f}" if validation else "No preview"),
+        },
+        {
+            "key": "hygiene_resolved",
+            "label": "No unresolved high-severity hygiene issues",
+            "passed": hygiene_high == 0,
+            "detail": (f"{hygiene_high} high-severity issue(s) still flagged"
+                       if hygiene_high else "All high-severity findings addressed"),
+        },
+        {
+            "key": "privacy_sufficient",
+            "label": "Privacy score at release threshold (≥ 70)",
+            "passed": privacy_score >= 70,
+            "detail": f"Privacy score {privacy_score:.1f} / 100",
+        },
+        {
+            "key": "sandbox_ready",
+            "label": "Overall quality sandbox-ready (≥ 70)",
+            "passed": overall_score >= 70,
+            "detail": f"Overall score {overall_score:.1f} / 100",
+        },
+        {
+            "key": "no_raw_exposure",
+            "label": "No raw source records in release artifacts",
+            "passed": True,
+            "detail": "Metadata-only transformation enforced (GOV-01).",
+        },
+        {
+            "key": "external_approved",
+            "label": "External summarization approved by reviewer",
+            "passed": approval_status == "Approved",
+            "detail": f"Approval status: {approval_status}",
+        },
+    ]
+    return conds
+
+
+def compute_guidance_availability(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+) -> dict[str, Any]:
+    """Determine whether External API assist is eligible, based on the
+    existing governance conditions. Returns current mode, eligibility,
+    and passing/missing conditions.
+
+    Modes:
+      - "internal": default; in-house deterministic guidance only
+      - "external": only available when all gates pass AND reviewer has
+                    approved external summarization
+    """
+    conds = build_handoff_conditions(metadata, controls)
+    by_key = {c["key"]: c for c in conds}
+    # External API assist requires the full readiness chain + reviewer approval
+    required = [
+        "approved", "released", "preview_ready", "hygiene_resolved",
+        "privacy_sufficient", "sandbox_ready", "no_raw_exposure", "external_approved",
+    ]
+    blocking = [by_key[k] for k in required if not by_key[k]["passed"]]
+    can_use_external = len(blocking) == 0
+
+    # The user can preview either UI version with one click. Actual external API
+    # calls still require can_use_external; the selected UI mode is not treated
+    # as runtime authorization.
+    desired_mode = str(st.session_state.get("guidance_mode", "internal"))
+    if desired_mode not in {"internal", "external"}:
+        desired_mode = "internal"
+
+    return {
+        "conditions": conds,
+        "passing": [c for c in conds if c["passed"]],
+        "missing": [c for c in conds if not c["passed"]],
+        "blocking": blocking,
+        "can_use_external": can_use_external,
+        "external_runtime_allowed": can_use_external,
+        "current_mode": desired_mode,
+    }
+
+
+# Kept for backward compatibility with earlier references (no longer used by UI)
+def compute_handoff_decision(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+) -> dict[str, Any]:
+    """Return the handoff decision: mode + reason + passing/blocking conditions.
+
+    Modes:
+      - "hold":     one or more blocker conditions fail → escalate
+      - "external": all preconditions + external approval granted
+      - "internal": default governed internal-only handoff
+    """
+    conds = build_handoff_conditions(metadata, controls)
+    by_key = {c["key"]: c for c in conds}
+
+    # Blockers — these must be green for any outbound handoff
+    blocker_keys = ["approved", "released", "preview_ready", "hygiene_resolved", "privacy_sufficient"]
+    failing_blockers = [by_key[k] for k in blocker_keys if not by_key[k]["passed"]]
+
+    if failing_blockers:
+        mode = "hold"
+        reason = (
+            f"{len(failing_blockers)} release blocker(s) still open — package is held pending "
+            "reviewer attention. The agent will not emit summaries or route outbound until the "
+            "missing conditions pass."
+        )
+    elif by_key["external_approved"]["passed"] and by_key["sandbox_ready"]["passed"] and by_key["no_raw_exposure"]["passed"]:
+        mode = "external"
+        reason = (
+            "All release blockers resolved, sandbox-ready quality, and external summarization was "
+            "approved by the reviewer. The agent is authorized to route synthetic-package summaries "
+            "to an external language model — metadata + aggregate metrics only, no raw rows."
+        )
+    else:
+        mode = "internal"
+        if not by_key["external_approved"]["passed"]:
+            reason = (
+                "Release blockers are resolved, but external summarization has not been approved "
+                "for this package. The agent generates internal role-aware summaries only; no data "
+                "leaves the governance boundary."
+            )
+        else:
+            reason = (
+                "Release blockers are resolved, but sandbox-readiness is insufficient for external "
+                "routing. The agent generates internal summaries only."
+            )
+
+    return {
+        "mode": mode,
+        "reason": reason,
+        "conditions": conds,
+        "failing_blockers": failing_blockers,
+        "passing": [c for c in conds if c["passed"]],
+        "missing": [c for c in conds if not c["passed"]],
+    }
+
+
+GUIDANCE_MODE_META = {
+    "internal": {
+        "label": "Internal guidance only",
+        "short": "Internal guidance",
+        "tagline": "Deterministic role-based guidance from the workspace\'s own metadata, hygiene, and validation state. No external model involved.",
+        "color": "#0b5ea8",
+        "bg": "#EBF1F7",
+        "icon": "🏛",
+    },
+    "external": {
+        "label": "External API assist",
+        "short": "External assist",
+        "tagline": "Richer role-based guidance and a conversational Q&A layer powered by an external language model. Metadata + aggregates only — never raw source records.",
+        "color": "#136B48",
+        "bg": "#EDF9F3",
+        "icon": "🛰",
+    },
+}
+
+
+def build_role_based_guidance(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+    availability: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    """Compact role-based guidance for Step 6. Each role gets exactly three
+    short blocks: Ready for / Watch out for / Suggested next step. Wording is
+    tight, enterprise, and actionable — no long paragraphs."""
+    validation = st.session_state.get("validation") or {}
+    summary = st.session_state.get("generation_summary") or {}
+    hygiene = st.session_state.get("hygiene") or {}
+    overall = float(validation.get("overall_score", 0))
+    eps = summary.get("privacy_epsilon", "n/a")
+    copula_cols = summary.get("copula_columns", []) or []
+    included = [m for m in metadata if m.get("include")]
+    restricted_fields = [m["column"] for m in included if metadata_sensitivity(m) == "Restricted"]
+    sensitive_fields = [m["column"] for m in included if metadata_sensitivity(m) == "Sensitive"]
+    sev_counts = hygiene.get("severity_counts", {}) or {}
+    high_issues = int(sev_counts.get("High", 0))
+
+    numeric_fields = [m["column"] for m in included if m.get("data_type") == "numeric"]
+    cat_fields = [m["column"] for m in included if m.get("data_type") == "categorical"]
+
+    # ---------- Data Analyst ----------
+    analyst_ready = [
+        f"Exploratory analytics on {len(numeric_fields)} numeric field(s) with joint-distribution preservation.",
+        f"Dashboard prototyping using {len(cat_fields)} categorical dimension(s).",
+        "Pipeline validation and vendor sandbox integration.",
+    ]
+    analyst_watch: list[str] = []
+    if restricted_fields:
+        analyst_watch.append(f"**Restricted fields** ({', '.join(restricted_fields[:2])}{'…' if len(restricted_fields) > 2 else ''}) are surrogate tokens, not reversible.")
+    if sensitive_fields:
+        analyst_watch.append(f"**Sensitive fields** generalised (date jitter, coarse geography) — exact source values are not recoverable.")
+    if high_issues:
+        analyst_watch.append(f"**{high_issues} high-severity hygiene finding(s)** still open — resolve before production use.")
+    if not analyst_watch:
+        analyst_watch.append("No blocking risks surfaced. Source identifiers and sensitive fields are governed.")
+    analyst_next = "Compare synthetic marginals to source for the key numeric field; confirm rare-case retention on outliers."
+
+    analyst = {
+        "headline": "Data Analyst",
+        "ready": analyst_ready,
+        "watch": analyst_watch,
+        "next": analyst_next,
+    }
+
+    # ---------- Manager / Reviewer ----------
+    mgr_ready = [
+        f"Sign off on internal sandbox distribution ({'quality pass' if overall >= 70 else 'below threshold'}).",
+        "Greenlight vendor integrations under governance boundary.",
+        "Scope a downstream approval gate for external summaries if needed.",
+    ]
+    mgr_watch = []
+    if high_issues:
+        mgr_watch.append(f"**{high_issues} high-severity hygiene finding(s)** — block before broader release.")
+    if overall < 70:
+        mgr_watch.append("Overall quality below sandbox threshold — additional review recommended.")
+    if not mgr_watch:
+        mgr_watch.append("Quality gates and audit trail all pass. No blockers for internal sandbox sign-off.")
+    mgr_watch.append("External pathway is metadata + aggregates only; raw records never leave the workspace.")
+    mgr_next = ("Confirm release profile matches the intended use case, then dispatch the internal summary."
+                if overall >= 70 and not high_issues else
+                "Return the package for remediation before approving wider internal use.")
+
+    manager = {
+        "headline": "Manager / Reviewer",
+        "ready": mgr_ready,
+        "watch": mgr_watch,
+        "next": mgr_next,
+    }
+
+    # ---------- Clinician / Non-technical ----------
+    clin_ready = [
+        "Review dashboards and reports that never touch real patient records.",
+        "Rehearse operational workflows and training demonstrations.",
+        "Evaluate vendor solutions under governance.",
+    ]
+    clin_watch = [
+        "**Not real patients** — every row is a synthetic analogue.",
+        "**Not for clinical decisions** — do not use to inform care for any real patient.",
+        "**Not for patient-level reporting** — outputs are statistical, not evidence.",
+    ]
+    clin_next = "Use the package to test systems, not to inform care. Real care decisions remain on approved clinical pathways."
+
+    clinician = {
+        "headline": "Clinician / Non-technical",
+        "ready": clin_ready,
+        "watch": clin_watch,
+        "next": clin_next,
+    }
+
+    return {
+        "Data Analyst": analyst,
+        "Manager / Reviewer": manager,
+        "Clinician / Non-technical": clinician,
+    }
+
+
+def build_next_step_recommendations(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Dynamic recommendations for \"what to do next with this synthetic data\".
+    Scored by package profile (quality, field composition, release profile)."""
+    validation = st.session_state.get("validation") or {}
+    summary = st.session_state.get("generation_summary") or {}
+    overall = float(validation.get("overall_score", 0))
+    correlation = float(validation.get("correlation_score", 0))
+    preset = controls.get("generation_preset", "Internal prototyping")
+    included = [m for m in metadata if m.get("include")]
+    has_numeric = any(m.get("data_type") == "numeric" for m in included)
+    has_dates = any(m.get("data_type") == "date" for m in included)
+    has_categorical = any(m.get("data_type") == "categorical" for m in included)
+    copula_cols = summary.get("copula_columns", []) or []
+
+    recs: list[dict[str, Any]] = []
+
+    # Each rec: {title, description, category, fit, why}
+    if has_numeric and has_dates:
+        recs.append({
+            "title": "Run operational trend analysis",
+            "description": "Decompose synthetic volumes over time — verify pipelines and seasonal logic without touching PHI.",
+            "category": "Analytics",
+            "fit": "High" if overall >= 75 else "Medium",
+            "why": "Date + numeric fields preserved; marginal distributions match source within tolerance.",
+        })
+    if has_numeric and len(copula_cols) >= 2:
+        recs.append({
+            "title": "Compare cohort mixes across synthetic fields",
+            "description": "Slice " + (", ".join(copula_cols[:3])) + " to validate joint-distribution behaviour end-to-end.",
+            "category": "Analytics",
+            "fit": "High" if correlation >= 75 else "Medium",
+            "why": f"Gaussian Copula preserved joint structure across {len(copula_cols)} numeric fields.",
+        })
+    if has_categorical:
+        recs.append({
+            "title": "Prototype dashboard and reporting logic",
+            "description": "Wire synthetic categorical fields into BI tools. Safe to share with vendor integrations inside the sandbox.",
+            "category": "Prototyping",
+            "fit": "High" if overall >= 70 else "Medium",
+            "why": "Categorical frequencies smoothed; no source labels leaked.",
+        })
+    recs.append({
+        "title": "Rehearse operational workflow scenarios",
+        "description": "Replay synthetic encounters through your ED flow model or capacity planner for rehearsal and training.",
+        "category": "Workflow testing",
+        "fit": "High" if preset in {"Analytics sandbox", "Internal prototyping"} else "Medium",
+        "why": f"Release profile \"{preset}\" is designed for workflow-level modelling inside the governance boundary.",
+    })
+    if overall >= 75:
+        recs.append({
+            "title": "Model sandbox evaluation",
+            "description": "Use synthetic records as input to risk models, scoring tools, or optimisation routines — validate behaviour before touching real PHI.",
+            "category": "Model sandboxing",
+            "fit": "High",
+            "why": f"Overall quality {overall:.1f} is strong enough for directional model behaviour checks.",
+        })
+    recs.append({
+        "title": "QA and validation practice",
+        "description": "Run the package through your data-quality checks and validation rules. Confirm tooling raises the right alerts on synthetic fabrications.",
+        "category": "QA / validation",
+        "fit": "High",
+        "why": "Ideal for tuning DQ rules without risking PHI exposure.",
+    })
+    recs.append({
+        "title": "Share manager review summary before broader internal use",
+        "description": "Dispatch the reviewer briefing to governance stakeholders before widening distribution to additional teams.",
+        "category": "Review",
+        "fit": "High",
+        "why": "Transparency — governance review captured before reuse.",
+    })
+    if overall < 70:
+        recs.insert(0, {
+            "title": "Further validation recommended before sandbox use",
+            "description": "Overall quality is below the sandbox threshold. Consider regenerating with tighter metadata or higher fidelity before relying on outputs.",
+            "category": "Review",
+            "fit": "Critical",
+            "why": f"Overall score {overall:.1f} / 100 — below recommended 70.",
+        })
+
+    return recs
+
+
+def build_external_summary_payload(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+) -> dict[str, Any]:
+    """The payload that WOULD be sent to an external LLM if external assist is active.
+    Shown verbatim in the UI so reviewers can verify no raw source leaves."""
+    summary = st.session_state.get("generation_summary") or {}
+    validation = st.session_state.get("validation") or {}
+    package_id = (active_metadata_package_record(metadata) or {}).get("package_id", "PKG-??")
+    included = [m for m in metadata if m.get("include")]
+    return {
+        "package_id": package_id,
+        "release_profile": controls.get("generation_preset", "Internal prototyping"),
+        "fields": [
+            {
+                "column": m["column"],
+                "role": m["data_type"],
+                "sensitivity": metadata_sensitivity(m),
+                "privacy_handling": m.get("control_action"),
+                "generation_method": resolve_generation_method(m, controls),
+            }
+            for m in included
+        ],
+        "quality_metrics": {
+            "overall_score": validation.get("overall_score"),
+            "fidelity_score": validation.get("fidelity_score"),
+            "privacy_score": validation.get("privacy_score"),
+            "correlation_score": validation.get("correlation_score"),
+        },
+        "constraints_detected": [c.get("rule") for c in (summary.get("detected_constraints") or [])],
+        "constraint_repairs_applied": sum(int(r.get("rows_repaired", 0)) for r in (summary.get("constraint_repairs") or [])),
+        "privacy_epsilon": summary.get("privacy_epsilon"),
+        "copula_columns": summary.get("copula_columns", []),
+        "excluded_columns": summary.get("excluded_columns", []),
+        # Explicitly absent: raw rows, identifier values, per-record data
+    }
+
+
+def _md_bold(text: str) -> str:
+    """Convert **bold** markdown to <strong> HTML — needed when we embed
+    bold-decorated strings inside inline-HTML divs (Streamlit's markdown
+    parser skips markdown syntax inside HTML)."""
+    import re
+    return re.sub(r"\*\*([^*]+?)\*\*", r"<strong>\1</strong>", text)
+
+
+def _guidance_mode_badge_html(mode: str, size: str = "large") -> str:
+    meta = GUIDANCE_MODE_META.get(mode, GUIDANCE_MODE_META["internal"])
+    if size == "large":
+        return (
+            f'<div style="display:inline-flex;align-items:center;'
+            f'padding:0.55rem 1.0rem;background:{meta["bg"]};border:1.5px solid {meta["color"]};'
+            f'border-radius:999px;">'
+            f'<span style="font-size:1.05rem;font-weight:800;color:{meta["color"]};letter-spacing:-0.01em;">{meta["label"]}</span>'
+            f'</div>'
+        )
+    return (
+        f'<span style="display:inline-flex;align-items:center;'
+        f'padding:0.22rem 0.6rem;background:{meta["bg"]};border:1px solid {meta["color"]};'
+        f'border-radius:999px;font-size:0.78rem;font-weight:700;color:{meta["color"]};">'
+        f'{meta["short"]}</span>'
+    )
+
+
+def _resolve_agent_api_key() -> tuple[str, str, str]:
+    """Return (api_key, session_key, env_key). session_key overrides env_key."""
+    import os
+    env_key = (os.environ.get("ANTHROPIC_API_KEY", "") or CHAT_ENV_API_KEY or "").strip()
+    session_key = str(st.session_state.get("agent_api_key", "")).strip()
+    return (session_key or env_key), session_key, env_key
+
+
+def _render_agent_api_panel() -> str:
+    """Always-on API key panel for Step 6. Returns resolved api_key string.
+    Includes paste + save + clear + test-connection."""
+    api_key, session_key, env_key = _resolve_agent_api_key()
+
+    with st.container(border=True, key="agent_api_key_panel"):
+        st.markdown(
+            '<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#0b5ea8;margin-bottom:0.3rem;">Claude API connection</div>',
+            unsafe_allow_html=True,
+        )
+        if api_key:
+            badge_color = "#136B48"; badge_bg = "#EDF9F3"; badge_label = (
+                "Ready · environment key" if env_key and not session_key else "Ready · session key"
+            )
+        else:
+            badge_color = "#9C6A17"; badge_bg = "#FFF6E3"; badge_label = "Local fallback (no API key set)"
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.6rem;flex-wrap:wrap;">'
+            f'<span style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.3rem 0.65rem;'
+            f'background:{badge_bg};border:1px solid {badge_color};border-radius:999px;'
+            f'font-size:0.78rem;font-weight:700;color:{badge_color};">● {badge_label}</span>'
+            f'<span style="font-size:0.82rem;color:#475569;">'
+            f'Paste your `sk-ant-…` key to power real Claude 4.6 Sonnet replies on this page. '
+            f'Key is kept in session only.</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        key_cols = st.columns([3, 1, 1, 1], gap="small")
+        with key_cols[0]:
+            entered = st.text_input(
+                "Anthropic API key",
+                value=session_key,
+                type="password",
+                key="agent_api_key_input",
+                placeholder="sk-ant-...",
+                label_visibility="collapsed",
+            )
+        with key_cols[1]:
+            if st.button("Save", use_container_width=True, key="agent_api_key_save"):
+                st.session_state.agent_api_key = entered.strip()
+                record_audit_event(
+                    "External API key updated",
+                    "Anthropic API key saved into session (analyst initiated).",
+                    status="Updated",
+                )
+                st.rerun()
+        with key_cols[2]:
+            test_clicked = st.button("Test", use_container_width=True, key="agent_api_key_test",
+                                     disabled=not api_key,
+                                     help="Run a minimal Claude API call to verify the key works.")
+        with key_cols[3]:
+            if st.button("Clear", use_container_width=True, key="agent_api_key_clear",
+                         disabled=not session_key):
+                st.session_state.agent_api_key = ""
+                st.session_state.pop("agent_api_test_result", None)
+                record_audit_event(
+                    "External API key cleared",
+                    "Anthropic API key removed from session.",
+                    status="Updated",
+                )
+                st.rerun()
+
+        if test_clicked and api_key:
+            with st.spinner("Pinging Claude API..."):
+                try:
+                    import anthropic
+                    client = anthropic.Anthropic(api_key=api_key)
+                    resp = client.messages.create(
+                        model="claude-sonnet-4-6",
+                        max_tokens=40,
+                        system="You verify API connectivity. Reply with exactly: OK, Claude ready.",
+                        messages=[{"role": "user", "content": "ping"}],
+                    )
+                    text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text").strip()
+                    usage = getattr(resp, "usage", None)
+                    tokens = f" · in {usage.input_tokens} / out {usage.output_tokens} tokens" if usage else ""
+                    st.session_state.agent_api_test_result = {
+                        "ok": True,
+                        "detail": f"Model responded: \"{text[:120]}\"{tokens}",
+                    }
+                    record_audit_event("External API test succeeded",
+                                       "Claude 4.6 Sonnet connectivity verified.", status="Completed")
+                except Exception as exc:
+                    st.session_state.agent_api_test_result = {
+                        "ok": False,
+                        "detail": f"{type(exc).__name__}: {exc}",
+                    }
+            st.rerun()
+
+        result = st.session_state.get("agent_api_test_result")
+        if result:
+            ok = result.get("ok", False)
+            tone_color = "#136B48" if ok else "#9d2b3c"
+            tone_bg = "#EDF9F3" if ok else "#fff1f3"
+            tone_border = "#B8E3CC" if ok else "#F0CCD3"
+            icon = "✓" if ok else "✕"
+            st.markdown(
+                f'<div style="margin-top:0.5rem;padding:0.55rem 0.8rem;background:{tone_bg};'
+                f'border:1px solid {tone_border};border-left:3px solid {tone_color};border-radius:8px;'
+                f'font-size:0.84rem;color:{tone_color};line-height:1.5;">'
+                f'<strong>{icon} {"Connection verified" if ok else "Connection failed"}</strong> — {result.get("detail", "")}</div>',
+                unsafe_allow_html=True,
+    )
+
+    return api_key
+
+
+def _render_external_payload_panel(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+    runtime_allowed: bool,
+) -> None:
+    payload = build_external_summary_payload(metadata, controls)
+    fields_count = len(payload.get("fields", []))
+    metrics = payload.get("quality_metrics", {}) or {}
+    constraints_count = len(payload.get("constraints_detected", []) or [])
+    excluded_count = len(payload.get("excluded_columns", []) or [])
+    status_color = "#136B48" if runtime_allowed else "#9C6A17"
+    status_bg = "#EDF9F3" if runtime_allowed else "#FFF6E3"
+    status_border = "#B8E3CC" if runtime_allowed else "#F0DDB5"
+    status_label = "External API runtime enabled" if runtime_allowed else "External UI selected · API runtime gated"
+    status_detail = (
+        "The reviewer and readiness gates allow external model calls using metadata and aggregates only."
+        if runtime_allowed
+        else "You can preview the external workflow now. Live external calls remain locked until all readiness gates pass."
+    )
+    cards = [
+        ("Payload scope", f"{fields_count} fields", "Metadata, roles, handling rules only"),
+        ("Quality", f"{float(metrics.get('overall_score') or 0):.1f}", "Overall package score"),
+        ("Constraints", str(constraints_count), "Detected rules included as summaries"),
+        ("Excluded", str(excluded_count), "Columns intentionally withheld"),
+    ]
+    cards_html = "".join(
+        '<div class="guidance-overview-card">'
+        f'<div class="guidance-overview-label">{html.escape(label)}</div>'
+        f'<div class="guidance-overview-value">{html.escape(value)}</div>'
+        f'<div class="guidance-overview-detail">{html.escape(detail)}</div>'
+        '</div>'
+        for label, value, detail in cards
+    )
+    with st.container(border=True, key="guidance_external_payload_panel"):
+        st.markdown(
+            '<div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#136B48;margin-bottom:0.3rem;">External version</div>'
+            '<div style="font-size:1.15rem;font-weight:700;color:#17324d;margin-bottom:0.2rem;line-height:1.3;">Payload preview and runtime boundary</div>'
+            '<div style="font-size:0.82rem;color:#668097;margin-bottom:0.85rem;line-height:1.5;">This is the exact class of information the external assistant may use. It excludes raw source rows and original identifiers.</div>'
+            f'<div class="guidance-overview-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">{cards_html}</div>'
+            f'<div style="margin-top:0.85rem;padding:0.7rem 0.9rem;background:{status_bg};border:1px solid {status_border};border-left:4px solid {status_color};border-radius:12px;">'
+            f'<div style="font-size:0.82rem;font-weight:800;color:{status_color};margin-bottom:0.15rem;">{status_label}</div>'
+            f'<div style="font-size:0.84rem;color:#17324d;line-height:1.5;">{status_detail}</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        with st.expander("View exact external metadata payload", expanded=False):
+            st.code(json.dumps(payload, indent=2, default=str), language="json")
+
+
+def _render_ask_agent_chat(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+    api_key: str,
+    live_mode: bool,
+    external_selected: bool = False,
+    prompt_tabs: dict[str, list[str]] | None = None,
+) -> None:
+    """Connected Agent analysis assistant."""
+    hygiene = st.session_state.get("hygiene") or {
+        "severity_counts": {"High": 0, "Medium": 0, "Low": 0},
+        "issues": [],
+        "quality_score": 0,
+    }
+    profile = st.session_state.get("profile") or {
+        "summary": {"rows": 0, "columns": 0, "identifier_columns": 0},
+    }
+    source_label = st.session_state.get("source_label", "Synthetic package")
+    summary = st.session_state.get("generation_summary")
+    validation = st.session_state.get("validation")
+    chat_controls = dict(controls)
+    chat_controls.setdefault("fidelity_priority", int(controls.get("fidelity_priority", 55)))
+    chat_controls.setdefault("synthetic_rows", int(controls.get("synthetic_rows", 0)))
+    try:
+        context = build_chat_context(
+            source_label=source_label,
+            profile=profile,
+            hygiene=hygiene,
+            metadata=metadata,
+            controls=chat_controls,
+            generation_summary=summary,
+            validation=validation,
+        )
+    except Exception:
+        context = f"Source: {source_label}. Rows: {profile.get('summary', {}).get('rows', 0)}."
+
+    will_call_api = bool(live_mode and api_key)
+    if will_call_api:
+        mode_note = "Ask analytical questions only. Replies are grounded in the approved synthetic package and governance context."
+        mode_chip = "Connected live"
+        capability_pills = ["Synthetic only", "Structured output", "Deeper reasoning"]
+        input_placeholder = "Ask for deeper analysis, weaknesses, hypotheses, or next steps…"
+    elif live_mode and not api_key:
+        mode_note = "Connected Agent is selected, but an API key is still needed."
+        mode_chip = "Connected setup"
+        capability_pills = ["API key required", "Preview only", "Synthetic only"]
+        input_placeholder = "Ask what the connected layer could help you do…"
+    elif external_selected:
+        mode_note = "Connected Agent is selected, but live analysis is still gated."
+        mode_chip = "Connected preview"
+        capability_pills = ["Preview only", "Synthetic only", "Governed access"]
+        input_placeholder = "Ask what to prepare before enabling the connected layer…"
+    else:
+        mode_note = "Local Agent is active inside the workspace."
+        mode_chip = "Local only"
+        capability_pills = ["Private", "Synthetic only", "Fast checks"]
+        input_placeholder = "Ask what this package is good for or what to inspect next…"
+
+    if prompt_tabs is None:
+        suggested_prompts = [
+            "What should I do next with this package?",
+            "Is local analysis enough for this decision?",
+            "What could the connected agent help me discover here?",
+        ]
+    elif isinstance(prompt_tabs, dict):
+        suggested_prompts = []
+        for group in prompt_tabs.values():
+            for prompt in group:
+                if prompt not in suggested_prompts:
+                    suggested_prompts.append(prompt)
+                if len(suggested_prompts) == 3:
+                    break
+            if len(suggested_prompts) == 3:
+                break
+    else:
+        suggested_prompts = list(prompt_tabs)[:3]
+
+    pills_html = "".join(f'<span class="step6-chat-pill">{html.escape(pill)}</span>' for pill in [mode_chip, *capability_pills])
+    st.markdown(f'<div class="step6-chat-banner">{pills_html}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="step6-assistant-note">{html.escape(mode_note)}</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="step6-kicker" style="margin-top:0.9rem;">Prompt starters</div>',
+        unsafe_allow_html=True,
+    )
+    prompt_cols = st.columns(len(suggested_prompts), gap="small")
+    for idx, prompt in enumerate(suggested_prompts):
+        if prompt_cols[idx].button(prompt, use_container_width=True, key=f"step6_analysis_prompt_{idx}"):
+            st.session_state._pending_analysis_prompt = prompt
+            st.rerun()
+
+    def format_analysis_output(content: str) -> str:
+        cleaned_lines: list[str] = []
+        for raw_line in (content or "").splitlines():
+            stripped = raw_line.strip()
+            if not stripped:
+                if cleaned_lines and cleaned_lines[-1] != "":
+                    cleaned_lines.append("")
+                continue
+            if stripped.startswith("```"):
+                continue
+            if re.fullmatch(r"[-*_]{3,}", stripped):
+                continue
+            heading_match = re.match(r"^#{1,6}\s+(.*)$", stripped)
+            if heading_match:
+                cleaned_lines.append(f"**{heading_match.group(1).strip(' :')}**")
+                continue
+            numbered_match = re.match(r"^\d+\.\s+(.*)$", stripped)
+            if numbered_match:
+                cleaned_lines.append(f"- {numbered_match.group(1).strip()}")
+                continue
+            bullet_match = re.match(r"^[-*]\s+(.*)$", stripped)
+            if bullet_match:
+                cleaned_lines.append(f"- {bullet_match.group(1).strip()}")
+                continue
+            cleaned_lines.append(stripped)
+
+        while cleaned_lines and cleaned_lines[-1] == "":
+            cleaned_lines.pop()
+        return "\n".join(cleaned_lines)
+
+    history = st.session_state.get("agent_chat_history", [])
+    if history:
+        for idx, turn in enumerate(history):
+            turn_role = turn.get("role", "assistant")
+            turn_label = "Analysis request" if turn_role == "user" else "Analysis output"
+            with st.container(border=True, key=f"step6_turn_{turn_role}_{idx}"):
+                st.markdown(f'<div class="step6-analysis-card-label">{turn_label}</div>', unsafe_allow_html=True)
+                if turn_role == "assistant":
+                    st.markdown(format_analysis_output(turn.get("content", "")))
+                else:
+                    st.markdown(
+                        f'<div class="step6-analysis-card-body">{html.escape(turn.get("content", ""))}</div>',
+                        unsafe_allow_html=True,
+                    )
+
+    action_cols = st.columns([0.9, 2.1], gap="small")
+    if history and action_cols[0].button("Clear history", use_container_width=True, key="step6_clear_analysis_history"):
+        st.session_state.agent_chat_history = []
+        st.rerun()
+
+    pending = st.session_state.pop("_pending_analysis_prompt", None)
+    user_input = pending or st.chat_input(input_placeholder, key="step6_analysis_chatbox")
+    if user_input:
+        history.append({"role": "user", "content": user_input})
+        analysis_context = (
+            context
+            + "\n\nConnected Agent response rules:"
+            + "\n- This is a professional analysis assistant, not a casual chat."
+            + "\n- Use concise analytical language."
+            + "\n- Do not use markdown headings like #, ##, or ###."
+            + "\n- Do not use horizontal rules."
+            + "\n- Prefer short bold section labels or tight bullet lists."
+            + "\n- Keep the response clean and presentation-ready inside the app."
+        )
+        spinner_label = "Analyzing with Connected Agent…" if will_call_api else "Preparing deterministic analysis…"
+        with st.spinner(spinner_label):
+            try:
+                effective_key = api_key if will_call_api else ""
+                reply = generate_chat_reply(
+                    api_key=effective_key,
+                    user_message=user_input,
+                    chat_history=history[:-1],
+                    context=analysis_context,
+                    role=st.session_state.get("current_role"),
+                )
+            except Exception as exc:
+                reply = (
+                    f"Structured fallback: the external model is unavailable ({type(exc).__name__}: {exc}). "
+                    "The workspace stayed in deterministic mode for this response."
+                )
+        history.append({"role": "assistant", "content": reply})
+        st.session_state.agent_chat_history = history
+        st.session_state.step6_analysis_request_input = ""
+        st.rerun()
+
+
+def _render_local_analysis_summary(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+    availability: dict[str, Any],
+) -> None:
+    """Powerful but bounded local-only decision support for Step 6."""
+    profile = st.session_state.get("profile") or {"summary": {"rows": 0, "columns": 0}, "columns": {}}
+    validation = st.session_state.get("validation") or {}
+    hygiene = st.session_state.get("hygiene") or {"severity_counts": {"High": 0, "Medium": 0, "Low": 0}}
+    columns_profile = profile.get("columns") or {}
+    rows = int((profile.get("summary") or {}).get("rows", 0))
+    cols = int((profile.get("summary") or {}).get("columns", 0))
+    total_missing = sum(int(details.get("missing_count", 0) or 0) for details in columns_profile.values())
+    total_cells = rows * cols
+    completeness = 100 - ((total_missing / total_cells) * 100) if total_cells else 100.0
+    missing_fields = sum(1 for details in columns_profile.values() if float(details.get("missing_pct", 0) or 0) > 0)
+    high_findings = int((hygiene.get("severity_counts") or {}).get("High", 0))
+    medium_findings = int((hygiene.get("severity_counts") or {}).get("Medium", 0))
+    overall_score = float(validation.get("overall_score", 0))
+    privacy_score = float(validation.get("privacy_score", 0))
+    correlation_score = float(validation.get("correlation_score", 0))
+    local_ready = overall_score >= 70 and high_findings == 0
+    restricted_count = sum(1 for item in metadata if bool(item.get("include")) and metadata_sensitivity(item) == "Restricted")
+    sensitive_count = sum(1 for item in metadata if bool(item.get("include")) and metadata_sensitivity(item) == "Sensitive")
+
+    if overall_score >= 85:
+        quality_note = "Data quality is strong enough for initial internal review."
+    elif overall_score >= 70:
+        quality_note = "Data quality is acceptable for initial internal review."
+    else:
+        quality_note = "Data quality still needs another pass before wider internal use."
+
+    if correlation_score >= 90:
+        stability_note = "Key distributions and relationships appear stable."
+    elif correlation_score >= 75:
+        stability_note = "Core patterns look usable, with some drift worth checking."
+    else:
+        stability_note = "Pattern stability is mixed; validate core fields before reuse."
+
+    checks = [
+        f"Missing values across {missing_fields} field(s)" if missing_fields else "Low missingness, but still verify completeness",
+        f"{high_findings} high / {medium_findings} medium hygiene findings" if (high_findings or medium_findings) else "Outlier presence in numeric fields",
+        "Field consistency across dates and sensitive columns",
+    ]
+    actions = [
+        "Review metadata settings before the next release" if high_findings == 0 else "Review metadata settings for the flagged fields",
+        "Run validation again after any package change",
+        "Switch to Connected Agent only when deeper exploration is needed" if not availability.get("can_use_external") else "Stay local for quick checks or move to Connected for deeper exploration",
+    ]
+
+    def build_local_card(kicker: str, title: str, items: list[str]) -> str:
+        items_html = "".join(f"<li>{html.escape(item)}</li>" for item in items)
+        return (
+            '<div class="step6-local-card">'
+            f'<div class="step6-local-kicker">{html.escape(kicker)}</div>'
+            f'<div class="step6-local-title">{html.escape(title)}</div>'
+            f'<ul class="step6-local-list">{items_html}</ul>'
+            '</div>'
+        )
+
+    st.markdown(
+        '<div class="step6-local-grid">'
+        + build_local_card(
+            "Quick insight",
+            "Local Analysis Summary",
+            [
+                quality_note,
+                stability_note,
+                f"{completeness:.1f}% completeness across the current source profile.",
+            ],
+        )
+        + build_local_card("Suggested checks", "What to verify next", checks)
+        + build_local_card("Next actions", "How to proceed", actions)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+    current_role = st.session_state.get("current_role", "Data Analyst")
+    local_role_lenses = ["Data Analyst", "Manager / Reviewer", "Privacy Officer"]
+    default_lens = current_role if current_role in local_role_lenses else "Data Analyst"
+    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
+
+    lens_cols = st.columns(len(local_role_lenses), gap="small")
+    for idx, lens in enumerate(local_role_lenses):
+        if lens_cols[idx].button(
+            lens,
+            use_container_width=True,
+            key=f"step6_local_role_{idx}",
+            type="primary" if selected_lens == lens else "secondary",
+        ):
+            st.session_state.step6_local_role_lens = lens
+            st.rerun()
+    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
+    st.caption(ROLE_PRIORITY_NOTES.get(selected_lens, ""))
+
+    if selected_lens == "Data Analyst":
+        role_title = "Analyst briefing"
+        role_lines = [
+            f"Analytical utility is strongest when overall quality stays above 70; the current package is at {overall_score:.1f}.",
+            f"Watch {missing_fields} field(s) with missing values and {high_findings} high-severity hygiene finding(s) before dashboard work.",
+            "Use the local console for fast screening, then move to Connected Agent for deeper pattern discovery.",
+        ]
+        role_actions = [
+            "Recheck highest-drift fields before publishing any internal dashboard.",
+            "Review field handling for restricted and sensitive columns.",
+            "Rerun validation after every major metadata or algorithm change.",
+        ]
+    elif selected_lens == "Manager / Reviewer":
+        role_title = "Reviewer briefing"
+        role_lines = [
+            "Treat the local console as a decision support layer for internal use, not as final approval evidence.",
+            f"Current internal readiness is {'acceptable for sandbox review' if local_ready else 'still conditional'} based on hygiene and quality signals.",
+            f"Privacy score is {privacy_score:.1f}/100 and correlation stability is {correlation_score:.1f}/100.",
+        ]
+        role_actions = [
+            "Check whether the current package is limited to internal sandbox use only.",
+            "Confirm unresolved hygiene findings are understood before wider circulation.",
+            "Use Connected Agent only when a richer analytical narrative is actually needed.",
+        ]
+    else:
+        role_title = "Privacy briefing"
+        role_lines = [
+            f"The current package includes {restricted_count} restricted field(s) and {sensitive_count} sensitive field(s) in the approved synthetic design.",
+            f"Privacy score is {privacy_score:.1f}/100; no raw source rows enter either the local or connected agent layer.",
+            "Focus on whether the current generalization choices match the intended downstream use.",
+        ]
+        role_actions = [
+            "Inspect sensitive dates, geography, and free-text-like fields first.",
+            "Confirm restricted identifiers are never required downstream.",
+            "Escalate review if the package use extends beyond controlled internal testing.",
+        ]
+
+    st.markdown(
+        '<div class="step6-local-grid" style="margin-top:0.9rem;grid-template-columns:repeat(2,minmax(0,1fr));">'
+        + build_local_card("Role lens", role_title, role_lines)
+        + build_local_card("Role actions", "What this role should do next", role_actions)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+    local_focus = st.session_state.get("step6_local_focus", "quality")
+    focus_cols = st.columns(3, gap="small")
+    if focus_cols[0].button("Package fit", use_container_width=True, key="step6_local_focus_quality"):
+        st.session_state.step6_local_focus = "quality"
+        st.rerun()
+    if focus_cols[1].button("Risk review", use_container_width=True, key="step6_local_focus_risks"):
+        st.session_state.step6_local_focus = "risks"
+        st.rerun()
+    if focus_cols[2].button("Decision brief", use_container_width=True, key="step6_local_focus_readiness"):
+        st.session_state.step6_local_focus = "readiness"
+        st.rerun()
+    local_focus = st.session_state.get("step6_local_focus", local_focus)
+
+    if local_focus == "quality":
+        if selected_lens == "Data Analyst":
+            memo_title = "Analyst package fit"
+            memo_lines = [
+                f"Overall package quality is {overall_score:.1f}/100 with completeness at {completeness:.1f}%.",
+                f"Use the current package for rapid prototyping only after checking {missing_fields} field(s) with missing values.",
+                "If you need hypothesis generation or pattern mining, hand off to Connected Agent after this local screen.",
+            ]
+        elif selected_lens == "Manager / Reviewer":
+            memo_title = "Reviewer package fit"
+            memo_lines = [
+                f"The package presents {overall_score:.1f}/100 overall quality and {privacy_score:.1f}/100 privacy protection for internal review.",
+                "This is strong enough for a controlled review conversation, but not by itself a release approval package.",
+                "Use the local view to decide whether the submission merits a deeper connected analysis.",
+            ]
+        else:
+            memo_title = "Privacy package fit"
+            memo_lines = [
+                f"Privacy protection is {privacy_score:.1f}/100 with {restricted_count} restricted and {sensitive_count} sensitive field(s) included.",
+                "Local review is the safest first pass for verifying whether synthetic controls match the intended internal use.",
+                "Escalate only when downstream use requires a richer justification narrative.",
+            ]
+    elif local_focus == "risks":
+        if selected_lens == "Data Analyst":
+            memo_title = "Analyst risk review"
+            memo_lines = [
+                f"{high_findings} high-severity and {medium_findings} medium-severity hygiene findings remain in the working package.",
+                f"Correlation stability is {correlation_score:.1f}/100, so drift checks should focus on sparse and high-impact fields first.",
+                "Validate outliers, null-heavy columns, and synthetic date behavior before building downstream assets.",
+            ]
+        elif selected_lens == "Manager / Reviewer":
+            memo_title = "Reviewer risk review"
+            memo_lines = [
+                f"Current blockers are {high_findings} high-severity and {medium_findings} medium-severity hygiene finding(s).",
+                "The main review question is whether those issues materially change internal-use readiness or simply require documentation.",
+                "If the decision still feels ambiguous, use Connected Agent to generate a tighter risk narrative.",
+            ]
+        else:
+            memo_title = "Privacy risk review"
+            memo_lines = [
+                f"Restricted and sensitive handling should be reviewed before any broader internal sharing decision.",
+                f"Privacy remains at {privacy_score:.1f}/100 while correlation stability sits at {correlation_score:.1f}/100; that balance deserves a quick check on quasi-identifiers.",
+                "Inspect synthetic dates, geography, and any potentially linkable structure before sign-off.",
+            ]
+    else:
+        if selected_lens == "Data Analyst":
+            memo_title = "Analyst decision brief"
+            memo_lines = [
+                "Proceed to internal sandbox testing." if local_ready else "Hold before wider internal testing.",
+                "Use the local agent as a go / no-go screen for dashboard prototyping, QA, and metadata cleanup.",
+                "Move to Connected Agent when you need richer explanation, scenario comparison, or hypothesis generation.",
+            ]
+        elif selected_lens == "Manager / Reviewer":
+            memo_title = "Reviewer decision brief"
+            memo_lines = [
+                "Current posture: acceptable for controlled internal review." if local_ready else "Current posture: keep the package in a conditional review state.",
+                "Local analysis is enough to support a first-pass reviewer conversation and to identify what evidence is still missing.",
+                "Use Connected Agent when you need a sharper narrative for approval, escalation, or executive discussion.",
+            ]
+        else:
+            memo_title = "Privacy decision brief"
+            memo_lines = [
+                "Current posture: keep this package within controlled internal use." if local_ready else "Current posture: resolve privacy-sensitive blockers before broader use.",
+                "Local analysis is the safest mode for privacy-first screening because it stays entirely in the workspace.",
+                "Only move to Connected Agent when a stronger analytical summary is needed on the approved synthetic package.",
+            ]
+
+    memo_html = ''.join(f"<li>{html.escape(line)}</li>" for line in memo_lines)
+    st.markdown(
+        '<div class="step6-analysis-card is-answer" style="margin-top:0.9rem;">'
+        '<div class="step6-analysis-card-label">Local analysis memo</div>'
+        f'<div class="step6-local-title" style="margin-bottom:0.55rem;">{html.escape(memo_title)}</div>'
+        f'<ul class="step6-local-list">{memo_html}</ul>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _render_chat_module(
+    metadata: list[dict[str, Any]],
+    controls: dict[str, Any],
+    api_key: str,
+    mode: str,
+    availability: dict[str, Any],
+) -> None:
+    """Full Ask-the-Agent module (bordered panel + header + chat).
+
+    In external mode this module is rendered high on the page (immediately
+    after the API panel) so the conversational assistant is the centerpiece.
+    In internal mode it is rendered near the bottom as a dormant preview with
+    deterministic replies — the role-based guidance stays the centerpiece.
+    """
+    with st.container(border=True, key="guidance_chat_panel"):
+        if mode == "external":
+            header_color = "#136B48"
+            header_title = "Ask the agent · External version"
+            if availability["can_use_external"]:
+                header_subtitle = "Live Claude 4.6 Sonnet · conversational assistant for this package"
+                header_caption = ("Ask anything about this package in natural language — role coaching, "
+                                  "next-step ideation, explanations. The agent sees only metadata, aggregates, "
+                                  "quality metrics, and audit context. Never raw source rows.")
+                banner = (
+                    '<div style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.95rem;'
+                    'background:#EDF9F3;border:1px solid #B8E3CC;border-left:3px solid #136B48;'
+                    'border-radius:10px;margin-bottom:0.85rem;">'
+                    '<span style="font-size:1.15rem;line-height:1;">👋</span>'
+                    '<div style="flex:1;font-size:0.88rem;color:#17324d;line-height:1.55;">'
+                    'I am Claude, running as the agent for this package. Ask me anything — I only see '
+                    'the approved synthetic artifacts and the governance context.</div>'
+                    '</div>'
+                )
+            else:
+                header_subtitle = "External interface preview · runtime gated"
+                header_caption = ("The external workflow is selected so the interface matches that version. Until all readiness gates pass, "
+                                  "answers continue through the local fallback.")
+                banner = ""
+        else:
+            header_color = "#0b5ea8"
+            header_title = "Ask the agent · Internal version"
+            header_subtitle = "Deterministic local Q&A with no external call"
+            header_caption = ("Replies come from in-house templates grounded in the package metadata. "
+                              "Switch to External version to unlock Claude-powered conversational guidance.")
+            banner = ""
+        st.markdown(
+            f'<div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:{header_color};margin-bottom:0.3rem;">{header_title}</div>'
+            f'<div style="font-size:1.15rem;font-weight:600;color:#17324d;margin-bottom:0.2rem;line-height:1.3;">{header_subtitle}</div>'
+            f'<div style="font-size:0.82rem;color:#668097;margin-bottom:0.85rem;line-height:1.5;">{header_caption}</div>'
+            f'{banner}',
+            unsafe_allow_html=True,
+        )
+        _render_ask_agent_chat(
+            metadata,
+            controls,
+            api_key=api_key,
+            live_mode=(mode == "external" and availability["can_use_external"]),
+            external_selected=(mode == "external"),
+        )
+
+
+def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) -> None:
+    """Step 6 - Agent analysis layer.
+
+    The workflow stays local through Steps 1-5. Step 6 introduces an optional
+    agent layer on top of the approved synthetic package:
+    - Local Agent: private, workspace-only, practical
+    - Connected Agent: external-model power on synthetic artifacts only
+    """
+    if not has_active_dataset():
+        st.info("No dataset in workspace.")
+        return
+    if st.session_state.get("synthetic_df") is None or not st.session_state.get("validation"):
+        st.warning("Agent analysis unlocks after synthetic preview + validation are available.")
+        if st.button("Return to package configuration", key="guidance_gate_back_config"):
+            st.session_state.current_step = 2
+            st.rerun()
+        return
+    if not st.session_state.get("results_shared_at"):
+        st.warning("Agent analysis unlocks after the release is recorded on the Release page.")
+        if st.button("Go to Release page", type="primary", key="guidance_gate_to_release"):
+            st.session_state.current_step = 4
+            st.rerun()
+        return
+
+    availability = compute_guidance_availability(metadata, controls)
+    mode = availability["current_mode"]
+    role = st.session_state.current_role
+    api_key, _session_key, _env_key = _resolve_agent_api_key()
+    has_api_key = bool(api_key)
+    connected_live = bool(mode == "external" and has_api_key)
+    connected_preview = bool(mode == "external" and not connected_live)
+
+    if connected_live:
+        verdict_label = "Connected Agent"
+        verdict_color, verdict_bg = "#136B48", "#EDF9F3"
+    elif connected_preview:
+        verdict_label = "Connected Preview"
+        verdict_color, verdict_bg = "#456b91", "#F3F6FA"
+    else:
+        verdict_label = "Local Agent"
+        verdict_color, verdict_bg = "#0b5ea8", "#EBF1F7"
+
+    def activate_connected_preview() -> None:
+        st.session_state.guidance_mode = "external"
+        record_audit_event(
+            "Guidance mode switched",
+            f"Step 6 switched to Connected Agent preview by {role}.",
+            status="Updated",
+        )
+        rerun_with_persist()
+
+    def activate_local_mode() -> None:
+        st.session_state.guidance_mode = "internal"
+        record_audit_event(
+            "Guidance mode switched",
+            f"Step 6 switched to Local Agent by {role}.",
+            status="Updated",
+        )
+        rerun_with_persist()
+
+    if connected_live:
+        connected_state = "Live"
+        connected_status = "Live"
+        connected_note = "API-backed analysis is active on approved synthetic outputs."
+    elif not has_api_key:
+        connected_state = "Setup"
+        connected_status = "Needs API key"
+        connected_note = "Add an API key only when you want the stronger analysis layer."
+    else:
+        connected_state = "Ready"
+        connected_status = "Ready"
+        connected_note = "Connected analysis becomes available as soon as you add an API key."
+
+    _render_status_strip_v2(5, verdict_label, verdict_color, verdict_bg)
+
+    with st.container(border=True, key="step6_mode_shell"):
+        st.markdown(
+            '<div class="step6-kicker" style="text-align:center;">Choose the analysis layer</div>'
+            '<div class="step6-heading step6-center-heading">Local by default. Connected when you need more power.</div>'
+            '<div class="step6-subheading step6-center-subheading">Pick the analysis path for this package.</div>',
+            unsafe_allow_html=True,
+        )
+
+        _, select_local_col, select_connected_col, _ = st.columns([1.2, 1, 1, 1.2], gap="small")
+        with select_local_col:
+            if st.button(
+                "Local Agent",
+                use_container_width=True,
+                key="step6_select_internal",
+                type="primary" if mode == "internal" else "secondary",
+            ):
+                if mode != "internal":
+                    activate_local_mode()
+        with select_connected_col:
+            if st.button(
+                "Connected Agent",
+                use_container_width=True,
+                key="step6_select_external",
+                type="primary" if mode == "external" else "secondary",
+            ):
+                if mode != "external":
+                    if not has_api_key:
+                        st.session_state.step6_open_runtime = True
+                    activate_connected_preview()
+
+        _, local_card_col, connected_card_col, _ = st.columns([0.3, 1, 1, 0.3], gap="medium")
+        local_card_html = (
+            f'<div class="step6-mode-tile{" is-active" if mode == "internal" else ""}">'
+            '<div class="step6-mode-top">'
+            '<div><div class="step6-mode-eyebrow">Default · Private</div><div class="step6-mode-name">Local Agent</div></div>'
+            f'<span class="step6-mode-state{" is-active" if mode == "internal" else ""}">{"Current" if mode == "internal" else "Available"}</span>'
+            '</div>'
+            '<ul class="step6-mode-points">'
+            '<li>Runs entirely inside the workspace</li>'
+            '<li>Never exposes raw source data</li>'
+            '<li>Role-based review for analyst, reviewer, and privacy lenses</li>'
+            '</ul>'
+            '</div>'
+        )
+        connected_card_html = (
+            f'<div class="step6-mode-tile{" is-active" if mode == "external" else ""}">'
+            '<div class="step6-mode-top">'
+            '<div><div class="step6-mode-eyebrow">Advanced · Optional</div><div class="step6-mode-name">Connected Agent</div></div>'
+            f'<span class="step6-mode-state{" is-active" if mode == "external" else ""}">{html.escape(connected_state)}</span>'
+            '</div>'
+            '<ul class="step6-mode-points">'
+            '<li>Supports deeper reasoning via API</li>'
+            '<li>Best for exploratory analysis</li>'
+            '<li>Requires external connection</li>'
+            '</ul>'
+            '</div>'
+        )
+        local_card_col.markdown(local_card_html, unsafe_allow_html=True)
+        connected_card_col.markdown(connected_card_html, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="step6-mode-summary">'
+            f'<span><strong>Current mode</strong> {html.escape(verdict_label)}</span>'
+            f'<span><strong>Connected</strong> {html.escape(connected_status)}</span>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        st.caption(connected_note)
+
+    if connected_live:
+        suggested_prompts = [
+            "What patterns should I investigate in this dataset?",
+            "Summarize key risks before deployment.",
+            "What anomalies should I validate next?",
+        ]
+        workspace_title = "Analysis Assistant"
+        workspace_subheading = "Structured analysis on approved synthetic outputs."
+    elif mode == "internal":
+        workspace_title = "Local Role Console"
+        workspace_subheading = "Private, role-based decision support inside the workspace."
+    else:
+        suggested_prompts = []
+        workspace_title = "Connected Agent preview"
+        workspace_subheading = (
+            "Preview only. Connect the API to start live analysis."
+            if not has_api_key
+            else "Preview only."
+        )
+
+    with st.container(border=True, key="step6_agent_shell"):
+        st.markdown(
+            '<div class="step6-kicker">Agent workspace</div>'
+            f'<div class="step6-heading" style="font-size:1.14rem;">{html.escape(workspace_title)}</div>'
+            f'<div class="step6-subheading">{html.escape(workspace_subheading)}</div>',
+            unsafe_allow_html=True,
+        )
+
+        if mode == "internal":
+            _render_local_analysis_summary(metadata, controls, availability)
+        elif connected_live:
+            _render_ask_agent_chat(
+                metadata,
+                controls,
+                api_key=api_key,
+                live_mode=connected_live,
+                external_selected=(mode == "external"),
+                prompt_tabs=suggested_prompts,
+            )
+        else:
+            preview_title = "Connect the API to turn on the advanced layer."
+            preview_copy = (
+                "Stay on Local Agent for now, or add an API key when you want deeper analysis."
+                if not has_api_key
+                else "Connected mode is selected. Add the API key to turn on the live analysis assistant."
+            )
+            st.markdown(
+                '<div class="step6-preview-panel">'
+                f'<div class="step6-preview-title">{html.escape(preview_title)}</div>'
+                f'<div class="step6-preview-copy">{html.escape(preview_copy)}</div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+            preview_cols = st.columns(2, gap="small")
+            if not has_api_key:
+                if preview_cols[0].button("Connect API key", use_container_width=True, type="primary", key="step6_preview_connect"):
+                    st.session_state.step6_open_runtime = True
+                    st.rerun()
+                if preview_cols[1].button("Return to Local Agent", use_container_width=True, key="step6_preview_back_local"):
+                    activate_local_mode()
+            else:
+                if preview_cols[0].button("Open connected setup", use_container_width=True, type="primary", key="step6_preview_open_runtime"):
+                    st.session_state.step6_open_runtime = True
+                    st.rerun()
+                if preview_cols[1].button("Return to Local Agent", use_container_width=True, key="step6_preview_back_local_gate"):
+                    activate_local_mode()
+
+    runtime_expanded = bool(st.session_state.get("step6_open_runtime", False))
+    runtime_title = "Connected setup" if not has_api_key else "Connected setup & payload"
+    runtime_caption = (
+        "Add your Claude key only when you want the advanced connected layer. The key stays in session only."
+        if not has_api_key
+        else "API connection and payload scope for the connected layer."
+    )
+    with st.expander(runtime_title, expanded=runtime_expanded):
+        st.caption(runtime_caption)
+        _render_agent_api_panel()
+        if has_api_key:
+            st.markdown('<div style="height:0.5rem;"></div>', unsafe_allow_html=True)
+            _render_external_payload_panel(metadata, controls, runtime_allowed=has_api_key)
 
 
 def render_step_five(metadata: list[dict[str, Any]], controls: dict[str, Any]) -> None:
@@ -6272,7 +8938,29 @@ def render_step_five(metadata: list[dict[str, Any]], controls: dict[str, Any]) -
 
         st.markdown('<div style="height:0.5rem;"></div>', unsafe_allow_html=True)
         if not st.session_state.results_shared_at:
-            if st.button("Record as released", use_container_width=True):
+            rec_cols = st.columns([1, 1], gap="small")
+            if rec_cols[0].button(
+                "Record as released & continue to Governed Handoff",
+                type="primary",
+                use_container_width=True,
+                key="record_and_handoff",
+                help="Logs the release event in the audit trail and opens the Governed Handoff decision gate.",
+            ):
+                st.session_state.results_shared_at = format_timestamp()
+                st.session_state.results_shared_by = st.session_state.current_role
+                st.session_state.release_status = "Released"
+                record_audit_event("Package released",
+                    f"{active_package['package_id'] if active_package else 'Package'} released by {st.session_state.current_role}.",
+                    status="Released")
+                # Auto-advance so the user lands on Step 6 immediately
+                st.session_state.current_step = 5
+                rerun_with_persist()
+            if rec_cols[1].button(
+                "Record release only",
+                use_container_width=True,
+                key="record_only",
+                help="Marks the release without navigating away. You can still go to Governed Handoff from the button below.",
+            ):
                 st.session_state.results_shared_at = format_timestamp()
                 st.session_state.results_shared_by = st.session_state.current_role
                 st.session_state.release_status = "Released"
@@ -6282,15 +8970,32 @@ def render_step_five(metadata: list[dict[str, Any]], controls: dict[str, Any]) -
                 rerun_with_persist()
         else:
             st.markdown(
-                f'<div style="padding:0.6rem 0.9rem;background:#EDF9F3;border:1px solid #B8E3CC;border-radius:10px;font-size:0.85rem;color:#136B48;">Released by {st.session_state.results_shared_by} at {st.session_state.results_shared_at}</div>',
+                f'<div style="padding:0.7rem 0.95rem;background:#EDF9F3;border:1px solid #B8E3CC;border-radius:12px;font-size:0.88rem;color:#136B48;font-weight:600;">'
+                f'✓ Released by {st.session_state.results_shared_by} at {st.session_state.results_shared_at}</div>',
                 unsafe_allow_html=True,
             )
 
-    # Back button
+    # Nav row — forward to handoff when released, back to configuration
+    if st.session_state.results_shared_at:
+        st.markdown('<div style="height:0.3rem;"></div>', unsafe_allow_html=True)
+        if st.button(
+            "→ Continue to Governed Handoff",
+            type="primary",
+            use_container_width=True,
+            key="release_to_handoff",
+            help="Let the agent decide how this package can be explained and shared: internal-only, external LLM assist, or held for review.",
+        ):
+            st.session_state.current_step = 5
+            st.rerun()
+
     nav = st.columns([1, 1], gap="small")
-    if nav[0].button("Back to configuration", use_container_width=True):
+    if nav[0].button("Back to configuration", use_container_width=True, key="release_back_to_configure"):
         st.session_state.current_step = 2
         st.rerun()
+    if st.session_state.results_shared_at:
+        if nav[1].button("Governed Handoff", use_container_width=True, key="release_to_handoff_bottom"):
+            st.session_state.current_step = 5
+            st.rerun()
 
 
 def main() -> None:
@@ -6374,17 +9079,21 @@ def main() -> None:
             """,
             height=0,
         )
+    clear_stale_step_artifacts(current_step)
 
-    if current_step == 0:
-        render_step_one(metadata)
-    elif current_step == 1:
-        render_step_two()
-    elif current_step == 2:
-        metadata, controls = render_step_three()
-    elif current_step == 3:
-        metadata, controls = render_step_four(metadata, controls)
-    elif current_step == 4:
-        render_step_five(metadata, controls)
+    with st.container(key=f"step_body_{current_step}"):
+        if current_step == 0:
+            render_step_one(metadata)
+        elif current_step == 1:
+            render_step_two()
+        elif current_step == 2:
+            metadata, controls = render_step_three()
+        elif current_step == 3:
+            metadata, controls = render_step_four(metadata, controls)
+        elif current_step == 4:
+            render_step_five(metadata, controls)
+        elif current_step == 5:
+            render_step_six(metadata, controls)
 
     persist_shared_workspace_state()
 
