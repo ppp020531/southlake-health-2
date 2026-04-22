@@ -1663,6 +1663,118 @@ def inject_styles() -> None:
                 max-width: 66rem;
             }
 
+            .step6-stage-shell {
+                display: grid;
+                grid-template-columns: minmax(0, 1.15fr) minmax(270px, 0.85fr);
+                gap: 0.9rem;
+                margin-top: 0.95rem;
+                padding: 1.08rem 1.08rem 1.02rem 1.08rem;
+                border-radius: 22px;
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                background: linear-gradient(145deg, #f7fbff 0%, #ffffff 50%, #f1f7fd 100%);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 20px 42px rgba(15, 39, 66, 0.06);
+            }
+
+            .step6-stage-shell.is-local {
+                border-color: rgba(11, 94, 168, 0.14);
+                background: linear-gradient(145deg, #eef5fc 0%, #ffffff 54%, #f7fbff 100%);
+            }
+
+            .step6-stage-shell.is-external {
+                border-color: rgba(19, 107, 72, 0.16);
+                background: linear-gradient(145deg, #eef9f3 0%, #ffffff 56%, #f7fcf9 100%);
+            }
+
+            .step6-stage-shell.is-preview {
+                border-color: rgba(86, 114, 146, 0.14);
+                background: linear-gradient(145deg, #f3f6fa 0%, #ffffff 54%, #f8fafc 100%);
+            }
+
+            .step6-stage-kicker {
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                color: #4a72a8;
+                margin-bottom: 0.34rem;
+            }
+
+            .step6-stage-title {
+                color: #10263f;
+                font-size: 1.56rem;
+                font-weight: 820;
+                letter-spacing: -0.035em;
+                line-height: 1.1;
+            }
+
+            .step6-stage-copy {
+                color: #27425c;
+                font-size: 0.92rem;
+                line-height: 1.62;
+                max-width: 42rem;
+                margin-top: 0.38rem;
+            }
+
+            .step6-stage-pillrow {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.48rem;
+                margin-top: 0.84rem;
+            }
+
+            .step6-stage-pill {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.38rem 0.68rem;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #4d6178;
+                font-size: 0.76rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .step6-stage-metrics {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.68rem;
+                align-self: stretch;
+            }
+
+            .step6-stage-metric {
+                padding: 0.84rem 0.88rem;
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.84);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+                min-height: 104px;
+            }
+
+            .step6-stage-metric-label {
+                color: #6f8297;
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.28rem;
+            }
+
+            .step6-stage-metric-value {
+                color: #10263f;
+                font-size: 1.28rem;
+                font-weight: 820;
+                letter-spacing: -0.03em;
+                line-height: 1.12;
+            }
+
+            .step6-stage-metric-detail {
+                color: #607285;
+                font-size: 0.78rem;
+                line-height: 1.48;
+                margin-top: 0.28rem;
+            }
+
             .step6-status {
                 display: inline-flex;
                 align-items: center;
@@ -1999,16 +2111,17 @@ def inject_styles() -> None:
             .step6-local-grid {
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 0.74rem;
+                gap: 0.82rem;
                 margin-top: 0.95rem;
             }
 
             .step6-local-card {
-                background: #f9fbfd;
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
                 border: 1px solid rgba(15, 39, 66, 0.08);
-                border-radius: 16px;
-                padding: 0.92rem 0.95rem;
+                border-radius: 18px;
+                padding: 0.96rem 0.98rem;
                 min-height: 192px;
+                box-shadow: 0 16px 30px rgba(15, 39, 66, 0.04);
             }
 
             .step6-local-kicker {
@@ -2112,10 +2225,11 @@ def inject_styles() -> None:
             }
 
             .step6-analysis-card {
-                border-radius: 16px;
+                border-radius: 18px;
                 border: 1px solid rgba(15, 39, 66, 0.08);
-                padding: 0.9rem 0.95rem;
-                background: #ffffff;
+                padding: 1rem 1.02rem;
+                background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+                box-shadow: 0 16px 30px rgba(15, 39, 66, 0.04);
             }
 
             .step6-analysis-card.is-query {
@@ -2143,10 +2257,11 @@ def inject_styles() -> None:
             }
 
             .step6-preview-panel {
-                padding: 0.94rem 1rem;
-                border-radius: 14px;
-                background: #f7f9fc;
+                padding: 1rem 1.05rem;
+                border-radius: 18px;
+                background: linear-gradient(145deg, #f5f8fb 0%, #ffffff 56%, #f7f9fc 100%);
                 border: 1px solid rgba(15, 39, 66, 0.08);
+                box-shadow: 0 16px 30px rgba(15, 39, 66, 0.04);
                 margin-top: 0.3rem;
             }
 
@@ -2164,6 +2279,158 @@ def inject_styles() -> None:
                 line-height: 1.5;
             }
 
+            .step6-preview-compact {
+                display: grid;
+                grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+                gap: 0.92rem;
+                margin-top: 0.36rem;
+                padding: 1.02rem 1.06rem;
+                border-radius: 20px;
+                background: linear-gradient(145deg, #f6f9fc 0%, #ffffff 58%, #f7fafd 100%);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                box-shadow: 0 16px 30px rgba(15, 39, 66, 0.04);
+            }
+
+            .step6-preview-kicker {
+                color: #6f8297;
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.34rem;
+            }
+
+            .step6-preview-headline {
+                color: #10263f;
+                font-size: 1.34rem;
+                font-weight: 820;
+                letter-spacing: -0.03em;
+                line-height: 1.12;
+            }
+
+            .step6-preview-body {
+                margin-top: 0.34rem;
+                color: #27425c;
+                font-size: 0.9rem;
+                line-height: 1.58;
+                max-width: 36rem;
+            }
+
+            .step6-preview-chiprow {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.48rem;
+                margin-top: 0.8rem;
+            }
+
+            .step6-preview-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.36rem 0.62rem;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.92);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #587087;
+                font-size: 0.75rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .step6-preview-side {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.62rem;
+            }
+
+            .step6-preview-mini {
+                padding: 0.78rem 0.82rem;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+            }
+
+            .step6-preview-mini-label {
+                color: #6f8297;
+                font-size: 0.66rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.24rem;
+            }
+
+            .step6-preview-mini-value {
+                color: #10263f;
+                font-size: 1rem;
+                font-weight: 800;
+                line-height: 1.18;
+            }
+
+            .step6-preview-mini-copy {
+                color: #607285;
+                font-size: 0.76rem;
+                line-height: 1.42;
+                margin-top: 0.2rem;
+            }
+
+            .step6-activation-strip {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 1rem;
+                align-items: center;
+                margin-top: 0.42rem;
+                padding: 1rem 1.06rem;
+                border-radius: 20px;
+                background: linear-gradient(145deg, #f7fafd 0%, #ffffff 64%, #f8fbfe 100%);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                box-shadow: 0 16px 30px rgba(15, 39, 66, 0.04);
+            }
+
+            .step6-activation-kicker {
+                color: #6f8297;
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 0.32rem;
+            }
+
+            .step6-activation-title {
+                color: #10263f;
+                font-size: 1.22rem;
+                font-weight: 810;
+                letter-spacing: -0.03em;
+                line-height: 1.16;
+            }
+
+            .step6-activation-copy {
+                margin-top: 0.28rem;
+                color: #607285;
+                font-size: 0.87rem;
+                line-height: 1.56;
+                max-width: 38rem;
+            }
+
+            .step6-activation-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.48rem;
+                margin-top: 0.74rem;
+            }
+
+            .step6-activation-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.34rem 0.58rem;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.94);
+                border: 1px solid rgba(15, 39, 66, 0.08);
+                color: #587087;
+                font-size: 0.73rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
             .step6-section-divider {
                 height: 1px;
                 background: rgba(192, 206, 220, 0.42);
@@ -2171,6 +2438,18 @@ def inject_styles() -> None:
             }
 
             @media (max-width: 980px) {
+                .step6-stage-shell {
+                    grid-template-columns: 1fr;
+                }
+
+                .step6-preview-compact {
+                    grid-template-columns: 1fr;
+                }
+
+                .step6-activation-strip {
+                    grid-template-columns: 1fr;
+                }
+
                 .step6-hero-grid {
                     grid-template-columns: 1fr;
                 }
@@ -2385,19 +2664,32 @@ def inject_styles() -> None:
             }
 
             .st-key-step6_agent_shell [data-testid="stButton"] button {
-                min-height: 3rem !important;
-                border-radius: 14px !important;
-                border: 1px solid rgba(15, 39, 66, 0.1) !important;
-                background: #ffffff !important;
+                min-height: 3.05rem !important;
+                border-radius: 16px !important;
+                border: 1px solid rgba(15, 39, 66, 0.09) !important;
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%) !important;
                 color: #17324d !important;
-                box-shadow: none !important;
-                font-weight: 700 !important;
+                box-shadow: 0 10px 22px rgba(15, 39, 66, 0.04) !important;
+                font-weight: 720 !important;
             }
 
             .st-key-step6_agent_shell [data-testid="stButton"] button:hover {
-                border-color: rgba(11, 94, 168, 0.26) !important;
+                border-color: rgba(11, 94, 168, 0.22) !important;
                 color: #0b5ea8 !important;
-                background: #f7f9fc !important;
+                background: #ffffff !important;
+                transform: translateY(-1px);
+            }
+
+            .st-key-step6_agent_shell [data-testid="stButton"] button[kind="primary"] {
+                background: linear-gradient(180deg, #0b5ea8 0%, #0a4f8d 100%) !important;
+                border-color: #0b5ea8 !important;
+                color: #ffffff !important;
+                box-shadow: 0 14px 28px rgba(11, 94, 168, 0.18) !important;
+            }
+
+            .st-key-step6_agent_shell [data-testid="stButton"] button[kind="primary"]:hover {
+                background: linear-gradient(180deg, #0a5a9f 0%, #094884 100%) !important;
+                color: #ffffff !important;
             }
 
             .st-key-step6_mode_shell [data-testid="stButton"] button {
@@ -2439,9 +2731,10 @@ def inject_styles() -> None:
             }
 
             .st-key-step6_agent_shell [data-testid="stChatInput"] {
-                border-radius: 16px !important;
-                border: 1px solid rgba(15, 39, 66, 0.1) !important;
-                background: #f7f9fc !important;
+                border-radius: 18px !important;
+                border: 1px solid rgba(15, 39, 66, 0.09) !important;
+                background: linear-gradient(180deg, #ffffff 0%, #f7fafd 100%) !important;
+                box-shadow: 0 14px 28px rgba(15, 39, 66, 0.04) !important;
             }
 
             .st-key-step6_agent_shell [data-testid="stTextArea"] textarea {
@@ -5452,11 +5745,22 @@ def clear_authenticated_view_artifacts_for_login() -> None:
                     doc.querySelector('.login-left-panel') ||
                     doc.querySelector('.login-form-title')
                 );
+                const setHidden = (el, hidden) => {
+                    try {
+                        if (hidden) {
+                            el.dataset.codexLoginHidden = "1";
+                            el.style.setProperty('display', 'none', 'important');
+                        } else if (el.dataset.codexLoginHidden === "1") {
+                            delete el.dataset.codexLoginHidden;
+                            el.style.removeProperty('display');
+                        }
+                    } catch (e) {}
+                };
                 const removeStaleAuthenticatedContent = () => {
                     if (!isLoginMounted()) return false;
                     staleSelectors.forEach((selector) => {
                         try {
-                            doc.querySelectorAll(selector).forEach((el) => el.remove());
+                            doc.querySelectorAll(selector).forEach((el) => setHidden(el, true));
                         } catch (e) {}
                     });
                     return true;
@@ -5607,26 +5911,35 @@ def render_step_navigation(metadata: list[dict[str, Any]], controls: dict[str, A
 
 
 def clear_stale_step_artifacts(current_step: int) -> None:
-    if current_step == 1:
-        return
-    st_components.html(
-        """
+    script = """
         <script>
             (function() {
                 const doc = window.parent && window.parent.document ? window.parent.document : document;
-                const removeStalePanels = () => {
+                const activeStep = __CURRENT_STEP__;
+                const syncFieldDistributionVisibility = () => {
                     try {
-                        if (doc.querySelector('.st-key-step_body_1')) return;
-                        doc.querySelectorAll('.st-key-field_distributions_panel').forEach((el) => el.remove());
+                        doc.querySelectorAll('.st-key-field_distributions_panel').forEach((el) => {
+                            if (activeStep === 1) {
+                                if (el.dataset.codexStepHidden === "1") {
+                                    delete el.dataset.codexStepHidden;
+                                    el.style.removeProperty('display');
+                                }
+                                return;
+                            }
+                            el.dataset.codexStepHidden = "1";
+                            el.style.setProperty('display', 'none', 'important');
+                        });
                     } catch (e) {}
                 };
-                removeStalePanels();
-                setTimeout(removeStalePanels, 60);
-                setTimeout(removeStalePanels, 180);
-                setTimeout(removeStalePanels, 420);
+                syncFieldDistributionVisibility();
+                setTimeout(syncFieldDistributionVisibility, 60);
+                setTimeout(syncFieldDistributionVisibility, 180);
+                setTimeout(syncFieldDistributionVisibility, 420);
             })();
         </script>
-        """,
+    """.replace("__CURRENT_STEP__", str(current_step))
+    st_components.html(
+        script,
         height=0,
     )
 
@@ -8092,6 +8405,39 @@ def _render_agent_api_panel() -> str:
     return api_key
 
 
+def _step6_stage_metric(label: str, value: str, detail: str) -> str:
+    return (
+        '<div class="step6-stage-metric">'
+        f'<div class="step6-stage-metric-label">{html.escape(label)}</div>'
+        f'<div class="step6-stage-metric-value">{html.escape(value)}</div>'
+        f'<div class="step6-stage-metric-detail">{html.escape(detail)}</div>'
+        '</div>'
+    )
+
+
+def _step6_stage_shell(
+    shell_class: str,
+    kicker: str,
+    title: str,
+    copy: str,
+    pills: list[str],
+    metrics: list[tuple[str, str, str]],
+) -> str:
+    pills_html = "".join(f'<span class="step6-stage-pill">{html.escape(pill)}</span>' for pill in pills)
+    metrics_html = "".join(_step6_stage_metric(label, value, detail) for label, value, detail in metrics)
+    return (
+        f'<div class="step6-stage-shell {html.escape(shell_class)}">'
+        '<div>'
+        f'<div class="step6-stage-kicker">{html.escape(kicker)}</div>'
+        f'<div class="step6-stage-title">{html.escape(title)}</div>'
+        f'<div class="step6-stage-copy">{html.escape(copy)}</div>'
+        f'<div class="step6-stage-pillrow">{pills_html}</div>'
+        '</div>'
+        f'<div class="step6-stage-metrics">{metrics_html}</div>'
+        '</div>'
+    )
+
+
 def _render_external_payload_panel(
     metadata: list[dict[str, Any]],
     controls: dict[str, Any],
@@ -8218,9 +8564,48 @@ def _render_ask_agent_chat(
     else:
         suggested_prompts = list(prompt_tabs)[:3]
 
-    pills_html = "".join(f'<span class="step6-chat-pill">{html.escape(pill)}</span>' for pill in [mode_chip, *capability_pills])
-    st.markdown(f'<div class="step6-chat-banner">{pills_html}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="step6-assistant-note">{html.escape(mode_note)}</div>', unsafe_allow_html=True)
+    if will_call_api:
+        hero_title = "Connected analysis on the approved synthetic package"
+        hero_copy = "Use the connected lane to test hypotheses, surface deployment risks, and translate technical package signals into crisp reviewer-ready guidance."
+        hero_metrics = [
+            ("Runtime", "Live", "Claude-connected analysis"),
+            ("Scope", "Synthetic only", "No raw source records"),
+            ("Output", "Structured", "Short analytical responses"),
+            ("Depth", "Advanced", "Best for exploratory reasoning"),
+        ]
+        hero_class = "is-external"
+    elif external_selected:
+        hero_title = "Connected analysis is staged but not live"
+        hero_copy = "The advanced lane is selected so you can frame the workflow and preview the experience. Add the API key when you want live reasoning."
+        hero_metrics = [
+            ("Runtime", "Preview", "No live model call yet"),
+            ("Scope", "Synthetic only", "Governed artifact boundary"),
+            ("Output", "Structured", "Connected UI preserved"),
+            ("Setup", "Required", "Add API key to continue"),
+        ]
+        hero_class = "is-preview"
+    else:
+        hero_title = "Local assistant inside the workspace"
+        hero_copy = "Use the private lane for quick package guidance and next-step screening without calling the external model."
+        hero_metrics = [
+            ("Runtime", "Local", "Workspace-only"),
+            ("Scope", "Synthetic only", "No raw rows exposed"),
+            ("Output", "Fast checks", "Deterministic guidance"),
+            ("Mode", "Private", "No external connection"),
+        ]
+        hero_class = "is-local"
+
+    st.markdown(
+        _step6_stage_shell(
+            hero_class,
+            "Analysis assistant",
+            hero_title,
+            hero_copy,
+            [mode_chip, *capability_pills],
+            hero_metrics,
+        ),
+        unsafe_allow_html=True,
+    )
     st.markdown(
         '<div class="step6-kicker" style="margin-top:0.9rem;">Prompt starters</div>',
         unsafe_allow_html=True,
@@ -8289,6 +8674,7 @@ def _render_ask_agent_chat(
             context
             + "\n\nConnected Agent response rules:"
             + "\n- This is a professional analysis assistant, not a casual chat."
+            + "\n- Treat vague questions like 'what should I do next' or 'what am I gonna do next' as requests for the best package-focused next action."
             + "\n- Use concise analytical language."
             + "\n- Do not use markdown headings like #, ##, or ###."
             + "\n- Do not use horizontal rules."
@@ -8377,6 +8763,52 @@ def _render_local_analysis_summary(
             '</div>'
         )
 
+    current_role = st.session_state.get("current_role", "Data Analyst")
+    local_role_lenses = ["Data Analyst", "Manager / Reviewer", "Privacy Officer"]
+    default_lens = current_role if current_role in local_role_lenses else "Data Analyst"
+    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
+
+    if selected_lens == "Data Analyst":
+        stage_title = "Private analyst console"
+        stage_copy = "Use the local lane for fast package triage, prototyping readiness, and metadata-aware decision support without leaving the workspace."
+    elif selected_lens == "Manager / Reviewer":
+        stage_title = "Private reviewer desk"
+        stage_copy = "Use the local lane to judge internal readiness, frame unresolved blockers, and decide whether a richer connected narrative is actually needed."
+    else:
+        stage_title = "Private privacy review desk"
+        stage_copy = "Use the local lane to screen privacy posture, inspect sensitive handling, and keep the first-pass assessment fully inside the governed workspace."
+
+    stage_metrics = [
+        ("Overall quality", f"{overall_score:.1f}", "Combined package score"),
+        ("Privacy", f"{privacy_score:.1f}", f"{restricted_count} restricted / {sensitive_count} sensitive"),
+        ("High findings", str(high_findings), "Flagged issues still open"),
+        ("Current posture", "Ready" if local_ready else "Conditional", "Local sandbox decision state"),
+    ]
+    st.markdown(
+        _step6_stage_shell(
+            "is-local",
+            "Local agent",
+            stage_title,
+            stage_copy,
+            [selected_lens, "Private runtime", "Role-based review"],
+            stage_metrics,
+        ),
+        unsafe_allow_html=True,
+    )
+
+    lens_cols = st.columns(len(local_role_lenses), gap="small")
+    for idx, lens in enumerate(local_role_lenses):
+        if lens_cols[idx].button(
+            lens,
+            use_container_width=True,
+            key=f"step6_local_role_{idx}",
+            type="primary" if selected_lens == lens else "secondary",
+        ):
+            st.session_state.step6_local_role_lens = lens
+            st.rerun()
+    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
+    st.caption(ROLE_PRIORITY_NOTES.get(selected_lens, ""))
+
     st.markdown(
         '<div class="step6-local-grid">'
         + build_local_card(
@@ -8393,24 +8825,6 @@ def _render_local_analysis_summary(
         + '</div>',
         unsafe_allow_html=True,
     )
-
-    current_role = st.session_state.get("current_role", "Data Analyst")
-    local_role_lenses = ["Data Analyst", "Manager / Reviewer", "Privacy Officer"]
-    default_lens = current_role if current_role in local_role_lenses else "Data Analyst"
-    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
-
-    lens_cols = st.columns(len(local_role_lenses), gap="small")
-    for idx, lens in enumerate(local_role_lenses):
-        if lens_cols[idx].button(
-            lens,
-            use_container_width=True,
-            key=f"step6_local_role_{idx}",
-            type="primary" if selected_lens == lens else "secondary",
-        ):
-            st.session_state.step6_local_role_lens = lens
-            st.rerun()
-    selected_lens = st.session_state.get("step6_local_role_lens", default_lens)
-    st.caption(ROLE_PRIORITY_NOTES.get(selected_lens, ""))
 
     if selected_lens == "Data Analyst":
         role_title = "Analyst briefing"
@@ -8680,7 +9094,11 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
     else:
         connected_state = "Ready"
         connected_status = "Ready"
-        connected_note = "Connected analysis becomes available as soon as you add an API key."
+        connected_note = (
+            "API key saved. Switch to Connected Agent to use the live analysis layer."
+            if mode == "internal"
+            else "API key saved. Connected analysis is available on this package."
+        )
 
     _render_status_strip_v2(5, verdict_label, verdict_color, verdict_bg)
 
@@ -8765,12 +9183,8 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
         workspace_subheading = "Private, role-based decision support inside the workspace."
     else:
         suggested_prompts = []
-        workspace_title = "Connected Agent preview"
-        workspace_subheading = (
-            "Preview only. Connect the API to start live analysis."
-            if not has_api_key
-            else "Preview only."
-        )
+        workspace_title = "Activate connected analysis"
+        workspace_subheading = "The mode is selected. Use the action below when you want to turn on the live layer."
 
     with st.container(border=True, key="step6_agent_shell"):
         st.markdown(
@@ -8799,9 +9213,18 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
                 else "Connected mode is selected. Add the API key to turn on the live analysis assistant."
             )
             st.markdown(
-                '<div class="step6-preview-panel">'
-                f'<div class="step6-preview-title">{html.escape(preview_title)}</div>'
-                f'<div class="step6-preview-copy">{html.escape(preview_copy)}</div>'
+                '<div class="step6-activation-strip">'
+                '<div>'
+                '<div class="step6-activation-kicker">Connected activation</div>'
+                f'<div class="step6-activation-title">{html.escape(preview_title)}</div>'
+                f'<div class="step6-activation-copy">{html.escape(preview_copy)}</div>'
+                '<div class="step6-activation-meta">'
+                '<span class="step6-activation-chip">Advanced reasoning</span>'
+                '<span class="step6-activation-chip">Synthetic-only boundary</span>'
+                '<span class="step6-activation-chip">Session key only</span>'
+                '</div>'
+                '</div>'
+                '<div></div>'
                 '</div>',
                 unsafe_allow_html=True,
             )
