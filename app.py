@@ -5200,86 +5200,6 @@ def quick_sign_in(role: str) -> None:
     st.rerun()
 
 
-def demo_jump_to_step_six(role: str = "Data Analyst") -> None:
-    """DEMO BACKDOOR — login + run the full pipeline on sample_data.csv +
-    set all governance flags + jump straight to Step 6 (Agent Guidance).
-
-    Remove this function and its callers before production.
-    """
-    email_stub = "analyst" if role == "Data Analyst" else "reviewer"
-    st.session_state.authenticated = True
-    st.session_state.current_role = role
-    st.session_state.current_user_email = f"{email_stub}@southlake.ca"
-
-    if not st.session_state.get("request_registry"):
-        create_blank_request("Demo preload · sample_data.csv")
-    df = pd.read_csv(SAMPLE_DATA_PATH).replace(r"^\s*$", pd.NA, regex=True)
-    set_source_dataframe(df, "Demo preload · sample_data.csv")
-
-    # Run full pipeline
-    metadata = editor_frame_to_metadata(st.session_state.metadata_editor_df)
-    controls = st.session_state.controls
-    try:
-        synthetic_df, gen_summary = generate_synthetic_advanced(
-            st.session_state.source_df, metadata, controls,
-        )
-        validation = validate_synthetic_data(
-            st.session_state.source_df, synthetic_df, metadata, controls,
-        )
-    except Exception as exc:
-        st.error(f"Demo preload failed during generation: {exc}")
-        return
-
-    st.session_state.synthetic_df = synthetic_df
-    st.session_state.generation_summary = gen_summary
-    st.session_state.validation = validation
-    st.session_state.last_generation_signature = build_generation_signature(metadata, controls)
-    st.session_state.release_status = "Released"
-
-    # Governance flags — all gates pass
-    st.session_state.intake_confirmed = True
-    st.session_state.hygiene_reviewed = True
-    st.session_state.settings_reviewed = True
-    st.session_state.settings_review_signature = build_metadata_signature(metadata)
-    st.session_state.metadata_status = "Approved"
-    ts = format_timestamp()
-    st.session_state.metadata_submitted_by = "Data Analyst (demo)"
-    st.session_state.metadata_submitted_at = ts
-    st.session_state.metadata_approved_by = "Manager / Reviewer (demo)"
-    st.session_state.metadata_approved_at = ts
-    st.session_state.metadata_reviewed_by = "Manager / Reviewer (demo)"
-    st.session_state.metadata_reviewed_at = ts
-    st.session_state.last_reviewed_metadata_signature = build_metadata_signature(metadata)
-
-    try:
-        register_metadata_submission(metadata)
-        register_metadata_approval(metadata)
-    except Exception:
-        pass
-
-    # Release recorded
-    st.session_state.results_shared_at = ts
-    st.session_state.results_shared_by = role
-
-    # External approval pre-approved so External API assist is unlocked
-    st.session_state.external_summary_approval_status = "Approved"
-    st.session_state.external_summary_approval_requested_by = "Data Analyst (demo)"
-    st.session_state.external_summary_approval_requested_at = ts
-    st.session_state.external_summary_approval_reviewer = "Manager / Reviewer (demo)"
-    st.session_state.external_summary_approval_at = ts
-    st.session_state.guidance_mode = "external"
-
-    # Jump to Step 6
-    st.session_state.current_step = 5
-
-    record_audit_event(
-        "DEMO BACKDOOR · preloaded Step 6",
-        "Pipeline ran on sample_data.csv; governance flags simulated; jumped to Agent Guidance.",
-        status="Completed",
-    )
-    st.rerun()
-
-
 def render_status_chip(kind: str) -> str:
     if kind == "Good":
         return "status-good"
@@ -5646,28 +5566,6 @@ def render_login_screen() -> None:
             quick_sign_in("Data Analyst")
         if st.button("Manager / Reviewer", use_container_width=True, key="login_demo_manager"):
             quick_sign_in("Manager / Reviewer")
-
-        # ── DEMO BACKDOOR ─────────────────────────────────────
-        # Remove this block before production. One-click preload that logs in,
-        # runs the full synthetic pipeline on sample_data.csv, and jumps
-        # straight to Step 6 (Agent Guidance).
-        st.markdown(
-            '<div style="margin-top:0.85rem;padding-top:0.85rem;'
-            'border-top:1px dashed #CBD5E1;">'
-            '<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#9C6A17;margin-bottom:0.35rem;">Demo shortcut</div>'
-            '<div style="font-size:0.82rem;color:#475569;line-height:1.5;margin-bottom:0.55rem;">'
-            'Skip Steps 0–4. Preloads <code>sample_data.csv</code>, runs the pipeline, '
-            'approves the package, records a release, and lands on Step 6 — Agent Guidance.</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        if st.button(
-            "Jump to Step 6 (demo)",
-            use_container_width=True,
-            key="login_demo_jump_step6",
-            help="Preload everything and land directly on Agent Guidance & Handoff.",
-        ):
-            demo_jump_to_step_six("Data Analyst")
 
         st.markdown(
             """
@@ -8291,9 +8189,20 @@ def _guidance_mode_badge_html(mode: str, size: str = "large") -> str:
 
 
 def _resolve_agent_api_key() -> tuple[str, str, str]:
-    """Return (api_key, session_key, env_key). session_key overrides env_key."""
+    """Return (api_key, session_key, env_key).
+
+    Priority:
+      1. session state key entered in the UI
+      2. Streamlit local secrets
+      3. environment / imported fallback
+    """
     import os
-    env_key = (os.environ.get("ANTHROPIC_API_KEY", "") or CHAT_ENV_API_KEY or "").strip()
+    secret_key = ""
+    try:
+        secret_key = str(st.secrets.get("ANTHROPIC_API_KEY", "")).strip()
+    except Exception:
+        secret_key = ""
+    env_key = (os.environ.get("ANTHROPIC_API_KEY", "") or secret_key or CHAT_ENV_API_KEY or "").strip()
     session_key = str(st.session_state.get("agent_api_key", "")).strip()
     return (session_key or env_key), session_key, env_key
 
@@ -8673,8 +8582,11 @@ def _render_ask_agent_chat(
         analysis_context = (
             context
             + "\n\nConnected Agent response rules:"
-            + "\n- This is a professional analysis assistant, not a casual chat."
+            + "\n- This is a professional analysis assistant with permission to make package-grounded recommendations and analytical judgments."
             + "\n- Treat vague questions like 'what should I do next' or 'what am I gonna do next' as requests for the best package-focused next action."
+            + "\n- Role-based questions for analyst, reviewer, manager, privacy, or stakeholder communication are in scope."
+            + "\n- Broad strategy questions are in scope if you can answer them from the synthetic package, metadata, quality, privacy, and governance context."
+            + "\n- Prefer a decisive answer with assumptions over a refusal."
             + "\n- Use concise analytical language."
             + "\n- Do not use markdown headings like #, ##, or ###."
             + "\n- Do not use horizontal rules."
@@ -9184,7 +9096,7 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
     else:
         suggested_prompts = []
         workspace_title = "Activate connected analysis"
-        workspace_subheading = "The mode is selected. Use the action below when you want to turn on the live layer."
+        workspace_subheading = "The mode is selected. Add your API key below when you want to turn on the live layer."
 
     with st.container(border=True, key="step6_agent_shell"):
         st.markdown(
@@ -9207,11 +9119,7 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
             )
         else:
             preview_title = "Connect the API to turn on the advanced layer."
-            preview_copy = (
-                "Stay on Local Agent for now, or add an API key when you want deeper analysis."
-                if not has_api_key
-                else "Connected mode is selected. Add the API key to turn on the live analysis assistant."
-            )
+            preview_copy = "Connected mode is selected. Add the API key in Connected setup below to start live analysis."
             st.markdown(
                 '<div class="step6-activation-strip">'
                 '<div>'
@@ -9228,21 +9136,8 @@ def render_step_six(metadata: list[dict[str, Any]], controls: dict[str, Any]) ->
                 '</div>',
                 unsafe_allow_html=True,
             )
-            preview_cols = st.columns(2, gap="small")
-            if not has_api_key:
-                if preview_cols[0].button("Connect API key", use_container_width=True, type="primary", key="step6_preview_connect"):
-                    st.session_state.step6_open_runtime = True
-                    st.rerun()
-                if preview_cols[1].button("Return to Local Agent", use_container_width=True, key="step6_preview_back_local"):
-                    activate_local_mode()
-            else:
-                if preview_cols[0].button("Open connected setup", use_container_width=True, type="primary", key="step6_preview_open_runtime"):
-                    st.session_state.step6_open_runtime = True
-                    st.rerun()
-                if preview_cols[1].button("Return to Local Agent", use_container_width=True, key="step6_preview_back_local_gate"):
-                    activate_local_mode()
 
-    runtime_expanded = bool(st.session_state.get("step6_open_runtime", False))
+    runtime_expanded = bool(st.session_state.get("step6_open_runtime", False) or (mode == "external" and not connected_live))
     runtime_title = "Connected setup" if not has_api_key else "Connected setup & payload"
     runtime_caption = (
         "Add your Claude key only when you want the advanced connected layer. The key stays in session only."
